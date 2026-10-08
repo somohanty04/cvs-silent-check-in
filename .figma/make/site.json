@@ -1,0 +1,11 @@
+{
+  "title": "CVS Silent Check-In",
+  "description": "Enable CVS customers to check in for prescription pickups silently, allowing them to shop while waiting, enhancing convenience and encouraging purchases.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,0 +1,659 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: "Inter:Bold";
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Inter:Medium";
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+}
+@font-face {
+  font-family: "Inter:Regular";
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+}
+
+/*
+  Tokens. Library values (instructor-supplied CVS Health library) are kept. Colours sampled from the
+  current CVS app screenshots (2026-10-06) confirmed that the app uses the same values for primary blue
+  (#004D99), brand red, warm-100, border-card, text tertiary/secondary and action surface.
+  Tokens under "cvs/" were sampled from the current app and are NOT in the supplied library.
+*/
+:root {
+  /* library colour variables */
+  --brand-red: #cc0000;
+  --action-primary: #004d99;
+  --action-pressed: #003d7a;
+  --action-surface: #e8f3fe;
+  --action-link: #0066cc;
+  --text-primary: #1a1a19;
+  --text-secondary: #5e5d5a;
+  --text-tertiary: #8f8c89;
+  --text-inverse: #ffffff;
+  --surface-card: #ffffff;
+  --surface-chrome: #f4f4f4;
+  --warm-100: #f2efeb;
+  --surface-sunken: #f9f7f5;
+  --border-card: #dbd8d5;
+  --border-field: #8f8c89;
+  --border-selected: #b4cae1;
+  --cool-50: #fafafa;
+  --cool-200: #f2f2f2;
+  --accent-star: #ec6a2c;
+  --feedback-error: #cc0000;
+  /* cvs/ — sampled from the current CVS app (not in the supplied library) */
+  --cvs-stock-green: #118738;      /* "15 in stock | Aisle 10" (IMG_1797); Health Check selected circle */
+  --cvs-stock-low: #cc6e00;        /* "1 in stock | Aisle 7" (IMG_1796) */
+  --cvs-warning: #e07800;          /* warning triangle (IMG_1810, IMG_1818) */
+  --cvs-selected-fill: #eef3ff;    /* selected option tile (IMG_1799) */
+  --cvs-tint-fill: #e6f3ff;        /* "Buy now" tinted button, selected fulfilment tile (IMG_1797) */
+  --cvs-segment-track: #eeeeef;    /* segmented control track (IMG_1815) */
+  --cvs-divider: #cccccc;          /* cart card outline and list dividers (IMG_1818) */
+  --cvs-divider-strong: #adabaa;   /* page-heading divider (IMG_1799) */
+  --cvs-caption: #767676;          /* helper captions (IMG_1823) */
+  --cvs-send-card: #ddf4f8;        /* "Send to card" pill (IMG_1769) */
+  --cvs-promo-yellow: #faecaf;     /* Extra Big Deals promo card (IMG_1788) */
+  --cvs-deal-yellow: #f8d930;      /* "extra big deals" tag (IMG_1769) */
+  --cvs-avatar: #66cabb;           /* initials avatar (IMG_1800) */
+  --cvs-fulfil-circle: #b8e3eb;    /* cart fulfilment illustration circle (IMG_1818) */
+  --cvs-empty-circle: #c3d5e8;     /* empty-state illustration circle (IMG_1821) */
+  --cvs-tab-pill: rgb(242 243 243 / 92%); /* shop tab bar pill (IMG_1790) */
+  --cvs-backdrop: rgb(0 0 0 / 65%);/* modal dim (IMG_1810) */
+  /* current-CVS-homepage values sampled from the designer's screenshot (approximate) */
+  --home-bg-1: #d7e9fa;
+  --home-bg-2: #e1f1fc;
+  --home-bg-3: #f2f8ff;
+  --home-selected-border: #94a2b2;
+  --home-assistant-ring: #b5e4e8;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --elevation-1: 0 2px 6px rgb(0 0 0 / 8%);
+  --elevation-2: 0 4px 16px rgb(0 0 0 / 12%);
+  --elevation-3: 0 8px 32px rgb(0 0 0 / 16%);
+  --header-shadow: 0 4px 10px rgb(0 0 0 / 7%);
+  --focus: #5c9ce6;
+
+  font-family: "Inter:Regular", Inter, Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--cool-50);
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--cool-50); }
+body { margin: 0; min-width: 20rem; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+[tabindex="-1"]:focus { outline: none; }
+h1, h2, h3, p { margin: 0; }
+strong, b { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Type ramp matched to the current CVS app (Inter substitutes for the app's proprietary typeface) ---------- */
+.t-display-xl { font-family: "Inter:Bold", Inter, sans-serif; font-size: 32px; line-height: 44px; font-weight: 700; } /* task-flow question headings (IMG_1799–1801, Screenshot 10.36.32) */
+.t-display { font-family: "Inter:Bold", Inter, sans-serif; font-size: 30px; line-height: 38px; font-weight: 700; }   /* confirmation headings (ScreenRecording 11-33-18, IMG_1812) */
+.t-title { font-family: "Inter:Bold", Inter, sans-serif; font-size: 24px; line-height: 30px; font-weight: 700; }     /* modal titles (IMG_1810), fulfilment (IMG_1818, regular) */
+.t-heading-lg { font-family: "Inter:Bold", Inter, sans-serif; font-size: 22px; line-height: 28px; font-weight: 700; } /* section titles (IMG_1792, IMG_1801) */
+.t-heading-md { font-family: "Inter:Bold", Inter, sans-serif; font-size: 20px; line-height: 26px; font-weight: 700; } /* header titles, card titles (IMG_1812) */
+.t-heading-sm { font-family: "Inter:Bold", Inter, sans-serif; font-size: 18px; line-height: 24px; font-weight: 700; } /* row titles, product names (IMG_1765) */
+.t-body-lg { font-size: 17px; line-height: 26px; }  /* flow questions, tiles, detail lines (IMG_1800, IMG_1801) */
+.t-body { font-size: 16px; line-height: 24px; }
+.t-label { font-family: "Inter:Bold", Inter, sans-serif; font-size: 16px; line-height: 22px; font-weight: 700; }
+.t-caption { font-size: 14px; line-height: 20px; }
+.t-micro { font-family: "Inter:Medium", Inter, sans-serif; font-size: 12px; line-height: 16px; }
+.regular { font-family: "Inter:Regular", Inter, sans-serif; font-weight: 400; }
+.c-secondary { color: var(--text-secondary); }
+.sale-text { color: var(--brand-red); }
+
+/* ---------- Shell ---------- */
+.app-shell { width: 100%; min-height: 100dvh; overflow-x: clip; }
+.page { width: 100%; min-height: 100dvh; margin: 0 auto; padding-top: 59px; padding-bottom: calc(40px + env(safe-area-inset-bottom)); background: var(--surface-card); }
+.has-tab-bar .page { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+.page.with-footer { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+.has-tab-bar .page.with-dock { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+.page.chat-page { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+.checked-in .page { padding-top: 117px; }
+.content { width: min(100%, 48rem); margin: 0 auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 24px; }
+.content > section { display: flex; flex-direction: column; gap: 8px; }
+.stack-4 { display: flex; flex-direction: column; gap: 4px; }
+.stack-8 { display: flex; flex-direction: column; gap: 8px; }
+.stack-12 { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Device status bar (utility, not part of app UI) ---------- */
+.phone-chrome { position: fixed; z-index: 45; top: 0; right: 0; left: 0; width: min(100%, 48rem); margin: 0 auto; color: var(--text-primary); background: var(--surface-card); }
+.home-page-active .phone-chrome { background: transparent; }
+.system-status { position: relative; display: grid; height: 59px; padding: 8px 24px 0; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.system-status > strong { font-size: 15px; }
+.dynamic-island { width: 124px; height: 36px; border-radius: 999px; background: #050505; }
+.system-icons { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+.cellular { display: flex; gap: 2px; align-items: flex-end; height: 11px; }
+.cellular i { width: 3px; border-radius: 1px; background: currentColor; }
+.cellular i:nth-child(1) { height: 4px; } .cellular i:nth-child(2) { height: 6px; } .cellular i:nth-child(3) { height: 8px; } .cellular i:nth-child(4) { height: 11px; }
+.system-icons svg { width: 17px; height: 12px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2.2; }
+.battery { position: relative; display: block; width: 25px; height: 12px; padding: 2px; border: 1.5px solid currentColor; border-radius: 4px; }
+.battery::after { position: absolute; top: 3px; right: -4px; width: 2px; height: 4px; border-radius: 0 2px 2px 0; background: currentColor; content: ""; }
+.battery i { display: block; width: 86%; height: 100%; border-radius: 1px; background: currentColor; }
+
+/* EXT E2 Pickup status strip — CVS R28 location-bar layout (full-bleed row, icon, bold label) with a status dot */
+.pickup-strip { display: flex; width: 100%; height: 58px; padding: 0 16px; gap: 12px; align-items: center; border-top: 1px solid var(--border-card); border-bottom: 1px solid var(--border-card); background: var(--cvs-tint-fill); text-align: left; }
+.pickup-strip .copy { display: flex; flex: 1; flex-direction: column; }
+.pickup-strip .copy .t-caption { color: var(--text-secondary); line-height: 18px; }
+.pickup-strip .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--cvs-stock-green); }
+.pickup-strip svg { color: var(--action-primary); }
+
+/* ---------- CVS R1 App header ---------- */
+.app-header { position: sticky; z-index: 8; top: 59px; background: var(--surface-card); }
+.checked-in .app-header { top: 117px; }
+.app-header.flow, .app-header.cart { box-shadow: var(--header-shadow); }
+.app-header .bar { display: flex; height: 56px; padding: 0 16px; gap: 12px; align-items: center; }
+.app-header .title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Inter:Bold", Inter, sans-serif; font-size: 19px; line-height: 24px; font-weight: 700; }
+.app-header.centered { box-shadow: none; }
+.app-header.centered .title { text-align: center; font-family: "Inter:Medium", Inter, sans-serif; font-weight: 500; font-size: 18px; }
+.header-assistant { display: grid; width: 40px; height: 40px; flex: none; padding: 0; place-items: center; border: 2px solid #b5e4e8; border-radius: 999px; color: #3478ec; background: #c1ebf5; }
+.app-header.cart .title { font-family: "Inter:Regular", Inter, sans-serif; font-weight: 400; }
+.app-header.shop { padding-bottom: 12px; }
+.header-back { display: grid; width: 40px; height: 44px; margin-left: -10px; padding: 0; place-items: center; border: 0; background: transparent; color: var(--text-primary); }
+.app-header .title:first-child { padding-left: 0; }
+.header-round { position: relative; display: grid; width: 40px; height: 40px; padding: 0; place-items: center; border: 0; border-radius: 999px; color: var(--text-primary); background: var(--surface-chrome); }
+.count-badge { position: absolute; top: -5px; right: -6px; display: grid; min-width: 20px; height: 20px; padding: 0 5px; place-items: center; border-radius: 999px; color: var(--text-inverse); background: var(--brand-red); font-family: "Inter:Medium", Inter, sans-serif; font-size: 12px; line-height: 14px; font-style: normal; }
+
+/* CVS R2 Search bar */
+.search-bar { display: flex; height: 44px; margin: 0 16px; padding: 0 12px; gap: 10px; align-items: center; border-radius: 10px; color: var(--text-primary); background: var(--warm-100); }
+.search-bar input { min-width: 0; height: 100%; flex: 1; padding: 0; border: 0; background: transparent; font-size: 17px; line-height: 22px; outline: 0; -webkit-appearance: none; appearance: none; }
+.search-bar input::placeholder { color: var(--text-secondary); }
+.search-bar input::-webkit-search-cancel-button { display: none; }
+.search-bar:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.search-bar .clear { display: grid; width: 40px; height: 44px; margin-right: -10px; padding: 0; place-items: center; border: 0; color: var(--text-secondary); background: transparent; }
+
+/* CVS R28 Location bar */
+.location-bar { display: flex; min-height: 56px; padding: 0 16px; gap: 12px; align-items: center; border-top: 1px solid var(--border-card); border-bottom: 1px solid var(--border-card); }
+.location-bar b { flex: 1; }
+
+/* ---------- CVS R3 Button ---------- */
+.btn { display: inline-flex; min-width: 0; padding: 0 24px; gap: 8px; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 999px; font-family: "Inter:Bold", Inter, sans-serif; font-size: 17px; line-height: 22px; font-weight: 700; white-space: nowrap; }
+.btn.lg { width: 100%; height: 44px; }  /* 44 pt measured (IMG_1799 "Next", IMG_1819 "Check out") */
+.btn.md { height: 44px; }
+.btn.sm { height: 38px; padding: 0 16px; font-size: 16px; }
+.btn.primary, .btn.add { color: var(--text-inverse); background: var(--action-primary); }
+.btn.primary:active, .btn.add:active { background: var(--action-pressed); }
+.btn.secondary { border-color: var(--text-primary); color: var(--action-primary); background: var(--surface-card); }
+.btn.secondary:active, .btn.tinted:active { background: var(--cvs-tint-fill); }
+.btn.tinted { border-color: var(--action-primary); color: var(--action-primary); background: var(--cvs-tint-fill); }
+.btn.text { width: auto; padding: 0 4px; align-self: center; color: var(--action-primary); background: transparent; }
+.btn.text.align-start { align-self: flex-start; padding: 0; }
+.btn:disabled { border: 1px dashed var(--border-field); color: var(--text-secondary); background: var(--warm-100); cursor: not-allowed; }
+.btn.text:disabled { border: 0; background: transparent; color: var(--text-tertiary); }
+.btn.busy:disabled { border-color: transparent; color: var(--text-inverse); background: var(--action-primary); opacity: 0.72; cursor: progress; }
+.btn.busy .spinner { border-color: rgb(255 255 255 / 100%) rgb(255 255 255 / 100%) transparent rgb(255 255 255 / 100%); }
+
+/* CVS R34 Spinner */
+.spinner { display: inline-block; flex: none; border: 3px solid; border-color: var(--action-primary) var(--action-primary) transparent var(--action-primary); border-radius: 999px; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-line { display: flex; gap: 10px; align-items: center; }
+
+/* ---------- Tab bars ---------- */
+/* CVS R20a Global tab bar (IMG_1785) */
+.global-tab-bar { position: fixed; z-index: 30; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); display: flex; width: min(calc(100% - 38px), 364px); height: 78px; padding: 0 8px; transform: translateX(-50%); align-items: center; justify-content: space-between; border: 1px solid rgb(255 255 255 / 90%); border-radius: 999px; background: rgb(255 255 255 / 76%); box-shadow: var(--elevation-2); backdrop-filter: blur(20px) saturate(1.4); }
+.global-tab-bar button { display: flex; width: 68px; height: 60px; padding: 0; flex-direction: column; gap: 4px; align-items: center; justify-content: center; border: 0; border-radius: 999px; color: var(--text-primary); background: transparent; }
+.global-tab-bar button svg { color: var(--brand-red); }
+.global-tab-bar button span { font-size: 13px; line-height: 16px; white-space: nowrap; }
+.global-tab-bar button.active { background: rgb(120 140 165 / 18%); cursor: default; }
+.global-tab-bar button.active span { font-family: "Inter:Medium", Inter, sans-serif; }
+
+/* CVS R20b Shop-area tab bar (IMG_1790) */
+.shop-tab-bar { position: fixed; z-index: 30; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); display: flex; width: min(calc(100% - 32px), 370px); gap: 8px; transform: translateX(-50%); }
+.shop-tab-bar button { display: flex; padding: 0; flex-direction: column; gap: 3px; align-items: center; justify-content: center; border: 0; color: var(--text-secondary); background: transparent; }
+.shop-tab-bar button span { font-size: 13px; line-height: 16px; white-space: nowrap; }
+.shop-tab-bar .home-button { width: 68px; height: 68px; flex: none; border: 1px solid rgb(255 255 255 / 90%); border-radius: 999px; color: var(--text-primary); background: rgb(255 255 255 / 86%); box-shadow: var(--elevation-2); backdrop-filter: blur(20px); }
+.shop-tab-bar .home-button svg { color: var(--brand-red); }
+.shop-tab-bar .pill { display: flex; height: 68px; padding: 0 6px; flex: 1; align-items: stretch; justify-content: space-around; border: 1px solid rgb(255 255 255 / 90%); border-radius: 999px; background: var(--cvs-tab-pill); box-shadow: var(--elevation-2); backdrop-filter: blur(20px); }
+.shop-tab-bar .pill button { position: relative; width: 66px; }
+.shop-tab-bar .pill button.active { color: var(--text-primary); cursor: default; }
+.shop-tab-bar .pill button.active svg { color: var(--brand-red); }
+.shop-tab-bar .pill button.active span { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
+.shop-tab-bar .pill button.active::before { position: absolute; top: 0; left: 50%; width: 30px; height: 2px; transform: translateX(-50%); border-radius: 1px; background: var(--text-primary); content: ""; }
+
+/* ---------- Headings and rows ---------- */
+/* CVS R10 Page heading */
+.page-heading { display: flex; flex-direction: column; gap: 12px; }
+.page-heading.divided { padding-bottom: 20px; border-bottom: 1px solid var(--cvs-divider-strong); }
+/* CVS R9 Section title */
+.section-title { display: flex; min-height: 36px; gap: 12px; align-items: center; justify-content: space-between; }
+.section-title .action { padding: 4px 0; border: 0; color: var(--action-primary); background: transparent; font-family: "Inter:Bold", Inter, sans-serif; font-size: 17px; line-height: 22px; font-weight: 700; }
+/* CVS R8 Detail row */
+.detail-row { position: relative; display: flex; padding: 14px 0; gap: 16px; align-items: flex-start; }
+.detail-row + .detail-row::before { position: absolute; top: 0; right: 0; left: 0; height: 1px; background: var(--cvs-divider); content: ""; }
+.detail-row:has(.icon-circle) + .detail-row:has(.icon-circle)::before { left: 64px; }
+.icon-circle { display: grid; width: 48px; height: 48px; flex: none; place-items: center; border-radius: 999px; color: var(--text-primary); background: var(--warm-100); }
+.detail-row > .body { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; padding-top: 2px; }
+.detail-row:not(:has(.icon-circle)) > .body { padding-top: 0; }
+.detail-row:has(> .value) { align-items: center; }
+.detail-row:has(> .value) > .body { padding-top: 0; }
+.detail-row > .value { color: var(--text-secondary); text-align: right; }
+.detail-row > .edit { display: grid; width: 40px; height: 40px; margin: -4px -8px 0 0; padding: 0; place-items: center; border: 0; color: var(--action-primary); background: transparent; }
+/* CVS R6 Nav list row (+ EXT E14 description line) */
+.nav-list { display: flex; flex-direction: column; }
+.nav-row { display: flex; width: 100%; min-height: 60px; padding: 12px 0; gap: 14px; align-items: center; border: 0; border-bottom: 1px solid var(--cvs-divider); color: var(--text-primary); background: transparent; text-align: left; }
+.nav-row > .body { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+.nav-row > .body .t-caption { color: var(--text-secondary); }
+.nav-row > svg { flex: none; }
+/* CVS R18 Plain list row */
+.plain-list { margin: 0 -16px; border-top: 1px solid var(--cvs-divider); }
+.plain-row { display: flex; width: 100%; min-height: 58px; padding: 12px 16px; gap: 12px; align-items: center; justify-content: space-between; border: 0; border-bottom: 1px solid var(--cvs-divider); background: var(--surface-card); text-align: left; font-size: 17px; }
+.plain-row > svg { flex: none; }
+/* CVS R7 Link card */
+.link-card { display: flex; width: 100%; padding: 20px; flex-direction: column; gap: 12px; align-items: flex-start; border: 1px solid var(--border-card); border-radius: var(--radius-xl); background: var(--surface-card); text-align: left; }
+.link-card .link, .checkin-entry .link { display: inline-flex; gap: 6px; align-items: center; color: var(--action-primary); font-family: "Inter:Bold", Inter, sans-serif; font-size: 16px; line-height: 22px; font-weight: 700; }
+
+/* CVS R11 Notices */
+.notice { display: flex; padding: 16px; gap: 14px; align-items: flex-start; border-radius: var(--radius-lg); text-align: left; }
+.notice > p { flex: 1; padding-top: 2px; }
+.notice b { font-family: "Inter:Bold", Inter, sans-serif; }
+.notice-icon { display: grid; flex: none; place-items: center; }
+.notice.info { background: var(--warm-100); }
+.notice.info .notice-icon { width: 24px; height: 26px; }
+.notice.warning, .notice.success { border: 1px solid var(--border-card); background: var(--surface-card); }
+.notice.warning .notice-icon { width: 44px; height: 44px; border-radius: 999px; color: var(--cvs-warning); background: var(--warm-100); }
+.notice.warning > p { padding-top: 10px; }
+.notice.success .notice-icon { width: 26px; height: 26px; margin-top: 0; border-radius: 999px; color: var(--text-inverse); background: var(--cvs-stock-green); }
+.notice .close { display: grid; width: 40px; height: 40px; margin: -6px -8px 0 0; padding: 0; place-items: center; border: 0; background: transparent; }
+
+/* ---------- Inputs ---------- */
+/* CVS R4 Check row */
+.check-list { display: flex; flex-direction: column; border-top: 1px solid var(--cvs-divider); }
+.check-row { position: relative; display: flex; min-height: 58px; padding: 12px 0; gap: 16px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--cvs-divider); cursor: pointer; }
+.check-row input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.check-circle { display: grid; width: 28px; height: 28px; flex: none; place-items: center; border: 1.5px solid var(--text-primary); border-radius: 999px; color: transparent; background: var(--surface-card); }
+.check-row input:checked + .check-circle { border-color: var(--cvs-stock-green); color: var(--text-inverse); background: var(--cvs-stock-green); }
+.check-row input:focus-visible + .check-circle { outline: 3px solid var(--focus); outline-offset: 2px; }
+.conditional-fields { display: flex; padding: 12px 0 16px 16px; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--cvs-divider); }
+.conditional-fields .check-row:last-child { border-bottom: 0; }
+/* CVS R26 Text field */
+.text-field, .dropdown-field { display: flex; flex-direction: column; gap: 6px; }
+.text-field .label, .dropdown-field .label { font-family: "Inter:Bold", Inter, sans-serif; font-size: 16px; line-height: 22px; font-weight: 700; }
+.text-field .helper, .dropdown-field .helper { color: var(--text-secondary); }
+.text-field input, .text-field textarea { width: 100%; height: 50px; padding: 0 14px; border: 1px solid var(--border-field); border-radius: var(--radius-md); background: var(--surface-card); font-size: 17px; line-height: 22px; }
+.text-field textarea { height: 88px; padding: 12px 14px; resize: vertical; }
+.text-field input::placeholder, .text-field textarea::placeholder { color: var(--text-tertiary); }
+.text-field input:focus, .text-field textarea:focus { border: 2px solid var(--action-primary); outline: 0; }
+/* CVS R25 Dropdown */
+.dropdown { position: relative; display: block; }
+.dropdown select { width: 100%; height: 50px; padding: 0 44px 0 14px; border: 1px solid var(--border-field); border-radius: var(--radius-md); color: var(--text-secondary); background: var(--surface-card); font-size: 17px; line-height: 22px; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.dropdown.filled select { color: var(--action-link); }
+.dropdown > svg { position: absolute; top: 14px; right: 14px; pointer-events: none; }
+.dropdown.error select { border: 2px solid var(--feedback-error); }
+.field-error { color: var(--feedback-error); }
+
+/* CVS R5 Segmented control */
+.segmented { display: grid; height: 42px; padding: 3px; grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 999px; background: var(--cvs-segment-track); }
+.segmented button { border: 0; border-radius: 999px; color: var(--text-primary); background: transparent; font-size: 16px; line-height: 20px; white-space: nowrap; }
+.segmented button[aria-selected="true"] { background: var(--surface-card); box-shadow: 0 1px 3px rgb(0 0 0 / 12%); font-family: "Inter:Medium", Inter, sans-serif; }
+
+/* ---------- Commerce ---------- */
+/* CVS R22 Deal tag */
+.deal-tag { display: inline-flex; width: fit-content; height: 24px; padding: 0 10px 0 14px; gap: 4px; align-items: center; color: var(--text-primary); background: var(--cvs-deal-yellow); clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%); border-radius: 0 4px 4px 0; font-family: "Inter:Bold", Inter, sans-serif; font-size: 13px; line-height: 16px; font-weight: 700; white-space: nowrap; }
+.deal-tag svg { fill: currentColor; stroke: none; }
+/* CVS R33 Price block */
+.price-block { display: flex; flex-direction: column; gap: 2px; }
+.price-block .sale-label { color: var(--brand-red); font-size: 13px; line-height: 16px; letter-spacing: 0.02em; }
+.price-block .price-line { display: flex; gap: 8px; align-items: baseline; }
+.price-block .price { font-size: 18px; line-height: 24px; }
+.price-block .price.sale { color: var(--brand-red); }
+.price-block del { color: var(--text-secondary); font-size: 15px; }
+/* CVS R23 Stock & aisle line */
+.stock-line { color: var(--cvs-stock-green); font-family: "Inter:Bold", Inter, sans-serif; font-size: 15px; line-height: 20px; font-weight: 700; }
+.supply-line { color: var(--cvs-stock-low); font-family: "Inter:Bold", Inter, sans-serif; font-size: 15px; line-height: 20px; font-weight: 700; }
+/* EXT E6 Coupon state (modified CVS R24 "Send to card" pill) */
+.coupon-state { display: inline-flex; width: fit-content; min-height: 30px; padding: 4px 12px; gap: 8px; align-items: center; border-radius: 999px; color: var(--text-primary); background: var(--cvs-send-card); font-size: 14px; line-height: 18px; }
+.coupon-state .mark { display: grid; width: 20px; height: 20px; flex: none; place-items: center; border-radius: 999px; color: var(--text-inverse); background: var(--action-link); }
+/* EXT E7 In-store product row (CVS R21 layout) */
+.product-list { display: flex; margin-top: -8px; flex-direction: column; }
+.product-row { display: grid; padding: 20px 0; grid-template-columns: 108px minmax(0, 1fr); gap: 16px; border-bottom: 1px solid var(--cvs-divider); }
+.product-row .media { display: flex; flex-direction: column; gap: 8px; }
+.product-image { display: block; width: 108px; height: 108px; padding: 0; overflow: hidden; border: 0; background: var(--surface-card); }
+.product-image img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+.product-row .media .deal-tag { max-width: 100%; }
+.product-row .info { display: flex; min-width: 0; flex-direction: column; gap: 6px; align-items: flex-start; }
+.product-row .row-actions { display: flex; margin-top: 4px; flex-direction: column; gap: 4px; align-items: flex-start; }
+.product-row .row-actions .btn.text { align-self: flex-start; padding: 0; }
+.results-head { display: flex; flex-direction: column; gap: 2px; }
+
+/* CVS R13 sheet product summary ("Added to cart") */
+.summary-product { display: flex; gap: 16px; align-items: flex-start; }
+.summary-product img { width: 72px; height: 72px; flex: none; border-radius: var(--radius-sm); object-fit: cover; }
+.summary-product .body { display: flex; min-width: 0; flex-direction: column; gap: 4px; align-items: flex-start; }
+.subtotal { text-align: center; }
+
+/* CVS R15 Fulfilment header, R14 cart item, R17 band, R16 summary */
+.fulfillment { display: flex; padding: 20px 16px; gap: 16px; align-items: center; border-top: 10px solid var(--warm-100); }
+.fulfil-circle { display: grid; width: 72px; height: 72px; flex: none; place-items: center; border-radius: 999px; background: var(--cvs-fulfil-circle); }
+.fulfillment .body { display: flex; flex-direction: column; }
+.fulfillment .t-title { font-size: 24px; line-height: 30px; }
+.cart-items { display: flex; padding: 0 16px 20px; flex-direction: column; gap: 12px; }
+.cart-item { padding: 16px; border: 1px solid var(--cvs-divider); border-radius: var(--radius-md); background: var(--surface-card); }
+.cart-item .top { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+.cart-item .top img { width: 72px; height: 72px; border-radius: var(--radius-sm); object-fit: cover; }
+.cart-item .top .body { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.stepper { display: flex; margin-top: 14px; gap: 12px; align-items: center; }
+.stepper button { display: grid; width: 34px; height: 34px; padding: 0; place-items: center; border: 1px solid #1e1e1e; border-radius: 999px; background: var(--surface-card); }
+.stepper .qty { display: inline-flex; height: 34px; padding: 0 16px; align-items: center; border: 1.5px solid var(--action-primary); border-radius: 999px; color: var(--action-primary); font-size: 16px; }
+.stepper .trash { margin-left: auto; }
+.item-promo { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--cvs-divider); }
+.band { height: 10px; background: var(--warm-100); }
+.cart-section { padding: 20px 16px; }
+.coupon-card { display: flex; padding: 16px; flex-direction: column; gap: 10px; border: 1px solid var(--cvs-divider); border-radius: var(--radius-lg); }
+.summary-band { display: flex; padding: 20px 16px calc(32px + env(safe-area-inset-bottom)); flex-direction: column; gap: 16px; background: var(--warm-100); }
+.summary-card { display: flex; padding: 20px; flex-direction: column; gap: 12px; border-radius: 20px; background: var(--surface-card); }
+.summary-card.bordered { border: 1px solid var(--border-card); }
+.summary-row { display: flex; gap: 12px; justify-content: space-between; }
+.summary-row > span:last-child { text-align: right; }
+.summary-row.total { padding-top: 14px; border-top: 1px solid var(--cvs-divider); }
+.cart-page { padding-bottom: 0 !important; background: var(--surface-card); }
+.cart-page .fulfillment { border-top: 0; }
+
+/* CVS R29 Empty state */
+.empty-state { display: flex; padding: 24px 20px; flex-direction: column; gap: 10px; align-items: center; border-radius: var(--radius-lg); background: var(--surface-sunken); text-align: center; }
+.empty-circle { display: grid; width: 72px; height: 72px; place-items: center; border-radius: 999px; color: var(--text-primary); background: var(--cvs-empty-circle); }
+
+/* CVS R30 Promo card */
+.promo-card { display: flex; padding: 20px; flex-direction: column; gap: 12px; border-radius: var(--radius-xl); background: var(--cvs-promo-yellow); }
+
+/* CVS R31 Sticky action footer + cart dock */
+.sticky-footer { position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; display: flex; max-width: 48rem; margin: 0 auto; padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); flex-direction: column; gap: 8px; background: rgb(255 255 255 / 94%); box-shadow: 0 -6px 16px rgb(0 0 0 / 8%); backdrop-filter: blur(12px); }
+.sticky-footer > p { text-align: center; }
+.cart-dock { position: fixed; z-index: 18; right: 0; bottom: calc(100px + env(safe-area-inset-bottom)); left: 0; max-width: 48rem; margin: 0 auto; padding: 12px 16px; background: rgb(255 255 255 / 94%); box-shadow: 0 -6px 16px rgb(0 0 0 / 8%); backdrop-filter: blur(12px); }
+
+/* ---------- Overlays ---------- */
+.sheet-backdrop { position: fixed; z-index: 50; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: rgb(0 0 0 / 40%); }
+/* CVS R13 Bottom sheet */
+.bottom-sheet { width: min(100%, 32rem); max-height: 92dvh; overflow: auto; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; background: var(--surface-card); box-shadow: var(--elevation-3); animation: sheet-slide-up 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.sheet-head { display: flex; padding: 10px 20px 8px; gap: 12px; flex-direction: column; }
+.sheet-head.center { align-items: center; border-bottom: 1px solid var(--cool-200); padding-bottom: 14px; }
+.sheet-head.left { align-items: stretch; }
+.sheet-head.left .grabber { align-self: center; }
+.grabber { width: 40px; height: 5px; border-radius: 999px; background: #c6c6c8; }
+.sheet-body { display: flex; padding: 16px 20px calc(28px + env(safe-area-inset-bottom)); flex-direction: column; gap: 16px; }
+/* CVS R12 Modal */
+.modal-backdrop { align-items: center; padding: 16px; background: var(--cvs-backdrop); }
+.modal { position: relative; display: flex; width: min(100%, 360px); max-height: calc(100dvh - 32px); padding: 28px 24px 24px; overflow-y: auto; flex-direction: column; gap: 16px; border-radius: var(--radius-2xl); background: var(--surface-card); box-shadow: var(--elevation-3); text-align: left; }
+.modal-close { position: absolute; top: 10px; right: 10px; display: grid; width: 44px; height: 44px; padding: 0; place-items: center; border: 0; border-radius: 999px; background: transparent; }
+.modal #coupon-confirmation { margin-right: 32px; }
+.modal-icon { display: flex; }
+.modal-icon.warning { color: var(--cvs-warning); }
+.modal-offers { display: flex; margin: 0; padding: 0; flex-direction: column; list-style: none; border-top: 1px solid var(--cvs-divider); }
+.coupon-row { display: flex; padding: 12px 0; gap: 12px; align-items: center; border-bottom: 1px solid var(--cvs-divider); }
+.coupon-row > span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fade-in { animation: fade-in 0.2s ease-out both; }
+.fade-out { animation: fade-out 0.2s ease-in both; pointer-events: none; }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* ---------- Extensions ---------- */
+/* EXT E3 Check-in confirmation */
+.checkin-confirmation { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.confirm-mark { display: grid; width: 64px; height: 64px; place-items: center; border-radius: 999px; color: var(--text-inverse); background: var(--cvs-stock-green); }
+/* EXT E4 Check-in progress card */
+.progress-card { display: flex; padding: 20px; flex-direction: column; gap: 6px; border: 1px solid var(--border-card); border-radius: var(--radius-xl); }
+.progress-line { position: relative; display: flex; margin: 14px 0 6px; justify-content: space-between; }
+.progress-line::before { position: absolute; top: 5px; right: 8px; left: 8px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--cvs-stock-green) 50%, var(--border-card) 50%); content: ""; }
+.progress-line i { z-index: 1; width: 14px; height: 14px; border: 2px solid var(--surface-card); border-radius: 999px; background: var(--cvs-stock-green); }
+.progress-line i:nth-child(2) { background: var(--action-primary); }
+.progress-line i:last-child { background: var(--border-card); }
+.progress-labels { display: flex; justify-content: space-between; }
+/* EXT E8 Aisle callout + shelf diagram */
+.aisle-callout { display: flex; padding: 16px; gap: 12px; align-items: center; border: 1px solid var(--action-primary); border-radius: var(--radius-lg); color: var(--action-primary); background: var(--cvs-tint-fill); }
+.aisle-callout > div { display: flex; flex-direction: column; }
+.shelf-map { display: flex; padding: 16px; flex-direction: column; gap: 8px; border-radius: var(--radius-lg); background: var(--surface-sunken); }
+.shelf-map > div { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; color: var(--text-secondary); }
+.shelf-map i { height: 14px; border-radius: var(--radius-sm); background: var(--border-card); }
+.shelf-map .active { color: var(--action-primary); }
+.shelf-map .active i { height: 20px; background: var(--action-primary); }
+/* EXT E10 Pharmacy Help chat (+ CVS R27 avatar) */
+.sender { display: flex; gap: 10px; align-items: center; }
+.avatar { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border-radius: 999px; color: var(--text-primary); background: var(--cvs-avatar); font-family: "Inter:Bold", Inter, sans-serif; font-size: 14px; font-weight: 700; }
+.chat-log { display: flex; margin: 0; padding: 0; flex-direction: column; gap: 12px; list-style: none; }
+.assistant-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px 16px 16px 4px; background: var(--warm-100); }
+.user-bubble { width: fit-content; max-width: 80%; margin-left: auto; padding: 12px 16px; border-radius: 16px 16px 4px 16px; color: var(--text-inverse); background: var(--action-primary); }
+.composer { position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; display: flex; max-width: 48rem; margin: 0 auto; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); gap: 12px; align-items: center; background: rgb(255 255 255 / 94%); box-shadow: 0 -6px 16px rgb(0 0 0 / 8%); backdrop-filter: blur(12px); }
+.composer input { min-width: 0; height: 48px; padding: 0 14px; flex: 1; border: 1px solid var(--border-field); border-radius: var(--radius-md); font-size: 17px; }
+.composer input::placeholder { color: var(--text-tertiary); }
+.composer button { display: grid; width: 48px; height: 48px; flex: none; padding: 0; place-items: center; border: 0; border-radius: 999px; color: var(--text-inverse); background: var(--action-primary); }
+.composer button:disabled { color: var(--text-tertiary); background: var(--warm-100); cursor: not-allowed; }
+/* EXT E11 Checkout pass card + CVS R19 step circles */
+.pass-card { display: flex; padding: 20px; gap: 16px; flex-direction: column; align-items: center; border: 1px solid var(--border-card); border-radius: var(--radius-xl); background: var(--surface-card); text-align: center; }
+.pass-card .brand-row { display: flex; width: 100%; justify-content: space-between; align-items: center; }
+.qr-code { display: grid; width: 176px; height: 176px; padding: 10px; grid-template-columns: repeat(9, 1fr); gap: 2px; border: 1px solid var(--border-card); background: var(--surface-card); }
+.qr-code i.filled { background: var(--text-primary); }
+.step-list { display: flex; margin: 0; padding: 0; flex-direction: column; gap: 14px; list-style: none; }
+.step-list li { display: flex; gap: 14px; align-items: center; }
+.step-circle { display: grid; width: 32px; height: 32px; flex: none; place-items: center; border: 1.5px solid var(--text-primary); border-radius: 999px; font-size: 17px; }
+/* EXT E12 Rating input */
+.rating-card { display: flex; padding: 20px; flex-direction: column; gap: 12px; border: 1px solid var(--border-card); border-radius: var(--radius-xl); }
+.rating-input { display: flex; justify-content: space-between; }
+.rating-input label { position: relative; display: grid; width: 48px; height: 48px; place-items: center; border-radius: 999px; color: var(--accent-star); cursor: pointer; }
+.rating-input input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.rating-input label:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- Current CVS homepage (CVS R32, IMG_1785) ---------- */
+.home-page { height: 100dvh; min-height: 0; padding-bottom: 0 !important; overflow: hidden; background: linear-gradient(180deg, var(--home-bg-1) 0, var(--home-bg-2) 170px, var(--home-bg-3) 340px, var(--surface-card) 560px); }
+.home-head { display: flex; padding: 10px 16px 0; flex-direction: column; }
+.home-actions { display: flex; height: 36px; padding: 0 4px; align-items: center; justify-content: space-between; }
+.home-actions > div { display: flex; gap: 14px; }
+.home-round { position: relative; display: grid; width: 36px; height: 36px; padding: 0; place-items: center; border: 0; border-radius: 999px; color: var(--text-primary); background: var(--surface-card); box-shadow: var(--elevation-1); }
+.home-round.assistant { color: #3478ec; background: #c1ebf5; box-shadow: 0 0 0 2px var(--home-assistant-ring), var(--elevation-1); }
+.home-round .count-badge { top: -6px; right: -8px; }
+.home-search { display: flex; height: 44px; margin-top: 14px; padding: 0 4px 0 12px; gap: 8px; align-items: center; border: 0; border-radius: 10px; color: var(--text-secondary); background: var(--surface-card); box-shadow: var(--elevation-1); text-align: left; }
+.home-search > .placeholder { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; line-height: 22px; }
+.home-search > svg { color: var(--text-primary); }
+.home-search .mic { display: grid; width: 34px; height: 36px; place-items: center; border-radius: 8px; color: var(--text-inverse); background: linear-gradient(135deg, #5b9ae6, #2f6fd6); }
+.home-chips { display: flex; margin: 18px -16px 0; padding: 0 16px 4px; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+.home-chips::-webkit-scrollbar { display: none; }
+.home-chip { height: 40px; padding: 0 14px; flex: none; border: 0; border-radius: 999px; background: var(--surface-card); box-shadow: var(--elevation-1); font-family: "Inter:Bold", Inter, sans-serif; font-size: 16px; line-height: 20px; font-weight: 700; }
+.home-selector { display: flex; height: 62px; margin-top: 16px; padding: 4px; gap: 4px; border-radius: 18px; background: rgb(244 244 244 / 80%); box-shadow: var(--elevation-1); }
+.home-selector button { display: flex; min-width: 0; flex: 1; gap: 6px; white-space: nowrap; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 14px; color: var(--text-secondary); background: transparent; font-size: 15px; line-height: 20px; }
+.home-selector button[aria-pressed="true"] { border-color: var(--home-selected-border); color: var(--text-primary); background: var(--surface-card); box-shadow: var(--elevation-1); font-family: "Inter:Bold", Inter, sans-serif; }
+.home-content { display: flex; padding: 12px 0 0; flex-direction: column; }
+.home-section-title { margin: 22px 16px 14px; font-size: 26px; line-height: 32px; }
+.activity-row { display: flex; padding: 0 16px; gap: 16px; overflow: hidden; }
+.activity-card { display: flex; width: 252px; height: 215px; flex: none; flex-direction: column; overflow: hidden; border: 1px solid var(--border-card); border-radius: var(--radius-xl); background: var(--surface-card); }
+.activity-card header { padding: 16px; border-bottom: 1px solid var(--border-card); }
+.activity-body { display: flex; padding: 12px 16px 16px; flex: 1; flex-direction: column; gap: 14px; align-items: center; justify-content: center; text-align: center; font-size: 16px; line-height: 22px; }
+.activity-body.vaccine { position: relative; justify-content: flex-end; }
+.activity-body.vaccine img { position: absolute; top: 6px; left: 87px; }
+.discover-row { display: flex; padding-left: 32px; gap: 47px; overflow: hidden; }
+/* EXT E1 Silent Check-In entry card (CVS R7 card shell + R8 icon circle) */
+.checkin-entry { display: flex; margin: 16px 16px 0; padding: 16px; gap: 14px; align-items: flex-start; border: 1px solid var(--border-card); border-radius: var(--radius-xl); color: var(--text-primary); background: var(--surface-card); text-align: left; }
+.checkin-entry .body { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; }
+.checkin-entry .link { margin-top: 4px; }
+
+/* ---------- Screen transitions ---------- */
+.screen-fade { animation: fade-in 0.2s ease-out backwards; }
+/* "backwards" so no transform remains after the slide (a lingering transform would trap fixed footers inside the screen) */
+.screen-slide-forward { animation: slide-in-right 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards; }
+.screen-slide-back { animation: slide-in-left 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards; }
+@keyframes slide-in-right { from { transform: translateX(100%); opacity: 0.6; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slide-in-left { from { transform: translateX(-100%); opacity: 0.6; } to { transform: translateX(0); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-slide-forward, .screen-slide-back, .screen-fade, .bottom-sheet, .fade-in, .fade-out { animation: none; }
+  .spinner { animation-duration: 2.4s; }
+}
+
+/* ---------- Phone view (desktop presentation only, not part of the app UI) ---------- */
+.phone-stage { display: flex; min-height: 100dvh; padding: 24px; align-items: center; justify-content: center; background: #e9e9ec; }
+.phone-device { flex: none; padding: 12px; transform-origin: top center; border-radius: 64px; background: #1b1b1b; box-shadow: 0 24px 60px rgb(0 0 0 / 22%); }
+.phone-device iframe { display: block; border: 0; border-radius: 52px; background: #fff; }
+
+/* ---------- Silent Check-In task flow (matches the CVS vaccine check-in flow) ---------- */
+.flow-page { background: var(--surface-card); }
+.content.flow { padding: 28px 24px 32px; gap: 24px; }
+.flow-helper { margin-top: -6px; }
+.stack-16 { display: flex; flex-direction: column; gap: 16px; }
+.divider { height: 1px; background: var(--cvs-divider); }
+/* CVS R41 hero illustration (Screenshot 10.36.32) */
+.flow-hero { display: block; width: 100%; height: auto; }
+.checklist-actions { display: flex; margin-top: 16px; flex-direction: column; gap: 16px; }
+/* CVS R35 option tiles + Yes/No tiles (IMG_1799, IMG_1800) */
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.tile-group { display: flex; flex-direction: column; gap: 12px; }
+.option-tile { position: relative; display: flex; min-height: 72px; padding: 0 24px; align-items: center; border: 1px solid var(--border-field); border-radius: var(--radius-md); background: var(--surface-card); cursor: pointer; }
+.option-tile.compact { min-height: 52px; padding: 0 16px; }
+.option-tile input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.option-tile.selected { border: 2px solid var(--action-link); background: var(--cvs-selected-fill); padding-left: 23px; }
+.option-tile.compact.selected { padding-left: 15px; }
+.option-tile.error { border-color: var(--feedback-error); }
+.option-tile:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+.yes-no-question legend { margin-bottom: 12px; }
+.yes-no { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.yes-no-question .field-error, .tile-group .field-error { margin-top: 8px; }
+/* CVS R36 info link (IMG_1800) */
+.info-link { display: flex; padding: 0 12px; gap: 12px; align-items: flex-start; border: 0; color: var(--action-primary); background: transparent; text-align: left; font-family: "Inter:Bold", Inter, sans-serif; font-size: 17px; line-height: 26px; font-weight: 700; }
+.info-dot { display: grid; width: 20px; height: 20px; flex: none; margin-top: 3px; place-items: center; border-radius: 999px; color: var(--text-inverse); background: var(--action-primary); font-size: 13px; line-height: 1; }
+/* CVS R27 avatar row */
+.avatar-row { display: flex; gap: 12px; align-items: center; }
+.avatar-row .avatar { width: 32px; height: 32px; font-size: 13px; }
+.avatar.large { width: 48px; height: 48px; font-size: 16px; }
+.avatar.gray { background: #e4e1df; }
+.detail-row.person .body { padding-top: 10px; }
+/* CVS R37 square checkbox (IMG_1807) */
+.square-check { display: flex; min-height: 44px; gap: 12px; align-items: center; cursor: pointer; }
+.square-check input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.square-check .box { display: grid; width: 24px; height: 24px; flex: none; place-items: center; border: 1.5px solid var(--text-primary); border-radius: 3px; color: transparent; background: var(--surface-card); }
+.square-check input:checked + .box { color: var(--text-inverse); background: var(--text-primary); }
+.square-check input:focus-visible + .box { outline: 3px solid var(--focus); outline-offset: 2px; }
+/* CVS R26 text field in flows (IMG_1807: bold label, helper "Example: MMDDYYYY") */
+.content.flow .text-field .label { font-size: 17px; }
+.text-field .helper.t-body { color: var(--text-primary); }
+.text-field.has-error input, .text-field.has-error textarea { border: 2px solid var(--feedback-error); }
+/* CVS R38 brand lockup */
+.cvs-lockup { display: inline-flex; margin-top: 4px; gap: 3px; align-items: center; color: var(--brand-red); }
+.cvs-lockup b { font-size: 17px; letter-spacing: -0.02em; font-style: italic; }
+.cvs-lockup span { font-size: 15px; }
+.t-label.caps { letter-spacing: 0.02em; }
+/* CVS R39 things to know */
+.things-to-know { display: flex; flex-direction: column; gap: 12px; }
+.things-to-know ul { display: flex; margin: 0; padding-left: 22px; flex-direction: column; gap: 8px; list-style: disc; }
+/* CVS R40 options panel (IMG_1804) */
+.options-panel { display: flex; padding: 28px 24px calc(40px + env(safe-area-inset-bottom)); flex-direction: column; gap: 16px; background: var(--surface-chrome); }
+.flow-page:has(.options-panel) { padding-bottom: 0 !important; }
+.consents { gap: 12px !important; }
+.consents .check-list { border-top: 0; }
+/* CVS R12 loading dialog (IMG_1809) */
+.loading-backdrop { z-index: 70; background: rgb(0 0 0 / 50%); }
+.loading-dialog { display: flex; width: min(100%, 360px); padding: 48px 24px; flex-direction: column; gap: 20px; align-items: center; border-radius: var(--radius-2xl); background: var(--surface-card); box-shadow: var(--elevation-3); }
+/* EXT E17 "Check in to pharmacy" Activity card (IMG_1803 card layout) */
+.checkin-activity { padding: 0; color: var(--text-primary); text-align: left; cursor: pointer; }
+.checkin-activity .activity-body { gap: 10px; padding-bottom: 6px; }
+.activity-foot { padding: 0 16px 14px; color: var(--text-secondary); }
+
+/* ---------- Shop v3: packshots, coupons, cards (matched to IMG_1765, IMG_1787, IMG_1792, IMG_1817) ---------- */
+/* EXT E22 packshots sit on white, uncropped, like the app's product photography */
+.packshot { display: block; flex: none; background: #fff; }
+.product-image { width: 112px; height: 112px; background: #fff; }
+.product-row .row-actions { flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; }
+.product-row .row-actions .btn.secondary svg { color: var(--action-primary); }
+.summary-product .packshot, .cart-item .top .packshot { border-radius: 0; }
+/* CVS R42 gray tag (IMG_1816) */
+.gray-tag { display: inline-flex; width: fit-content; padding: 3px 10px; border-radius: 6px; color: var(--text-primary); background: var(--warm-100); font-size: 15px; line-height: 20px; }
+/* EXT E19 shelf-location feature card */
+.feature-card { display: flex; padding: 16px; gap: 14px; align-items: flex-start; border: 1px solid var(--border-card); border-radius: var(--radius-lg); }
+.feature-card .body { display: flex; flex: 1; flex-direction: column; gap: 4px; }
+.feature-card .icon-circle { color: var(--action-primary); background: var(--cvs-tint-fill); }
+/* Segmented control with three lists */
+.segmented { display: flex; }
+.segmented button { flex: 1 1 auto; padding: 0 10px; font-size: 15px; }
+/* CVS R43 coupon card (IMG_1817) */
+.coupon-list { display: flex; flex-direction: column; gap: 20px; }
+.cvs-coupon { display: flex; padding: 20px; flex-direction: column; gap: 14px; border: 1px solid #E6E6E6; border-radius: 10px; background: var(--surface-card); box-shadow: 0 2px 6px rgb(0 0 0 / 12%); }
+.coupon-main { display: flex; gap: 16px; align-items: flex-start; }
+.coupon-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 8px; align-items: flex-start; }
+.coupon-amount { color: var(--brand-red); font-family: "Inter:Regular", Inter, sans-serif; font-size: 30px; line-height: 36px; font-weight: 400; }
+.coupon-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline; justify-content: space-between; }
+.coupon-actions { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.coupon-actions .btn.secondary svg { color: var(--action-primary); }
+.round-action { display: flex; padding: 0; gap: 4px; flex-direction: column; align-items: center; border: 0; color: var(--action-primary); background: transparent; }
+.round-action .circle { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 999px; color: var(--text-inverse); background: var(--action-primary); }
+.round-action.done .circle { background: var(--cvs-stock-green); }
+/* CVS R44 product card + round add-to-cart button (IMG_1789, IMG_1798) */
+.carousel-section { padding-top: 4px; }
+.carousel-section h2 { margin-bottom: 16px; }
+.product-carousel { display: flex; margin: 0 -16px; padding: 2px 16px 8px; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.product-carousel::-webkit-scrollbar { display: none; }
+.product-card { display: flex; width: 168px; flex: none; padding: 12px; flex-direction: column; gap: 6px; border: 1px solid #ECECEC; border-radius: var(--radius-lg); background: var(--surface-card); scroll-snap-align: start; }
+.card-media { position: relative; display: grid; height: 132px; place-items: center; }
+.fab-add { position: absolute; top: 4px; right: -2px; display: grid; width: 48px; height: 48px; padding: 0; place-items: center; border: 0; border-radius: 999px; color: var(--text-inverse); background: #1E4C94; }
+.card-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+/* CVS R45 category cards (IMG_1792) */
+.category-cards { display: grid; margin-top: 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.category-card { display: flex; padding: 18px 12px 16px; flex-direction: column; gap: 6px; align-items: center; border: 1px solid var(--border-card); border-radius: var(--radius-lg); color: var(--text-primary); background: var(--surface-card); text-align: center; }
+.category-card .t-caption { color: var(--text-secondary); }
+.category-circle { display: grid; width: 84px; height: 84px; margin-bottom: 6px; place-items: center; overflow: hidden; border-radius: 999px; }
+.category-circle.low { background: #F9D7DC; }
+.category-circle.frequent { background: #CFE2FA; }
+.category-circle .packshot { background: transparent; }
+.category-circle .packshot rect:first-child { fill: transparent; }
+
+/* ---------- v4: mint check-in details, rewards banner, popup list buttons, Savings › Coupons ---------- */
+:root { --cvs-mint-1: #beefde; --cvs-mint-2: #def6eb; --cvs-mint-3: #effaf5; } /* "Shop Your Needs" header gradient (IMG_1765) */
+.status-page { background: linear-gradient(180deg, var(--cvs-mint-1) 0, var(--cvs-mint-2) 320px, var(--cvs-mint-3) 720px) !important; }
+.app-header.mint { background: var(--cvs-mint-1); box-shadow: none; }
+.status-page .progress-card, .status-page .category-card, .status-page .link-card, .status-page .notice.warning { background: var(--surface-card); }
+.status-page .options-panel { background: rgb(255 255 255 / 70%); }
+.status-page .icon-circle { background: var(--surface-card); }
+/* EXT E3 centred */
+.checkin-confirmation.centered { align-items: center; gap: 12px; text-align: center; }
+.checkin-confirmation.centered .t-body-lg { max-width: 320px; }
+/* CVS R46 rewards banner (IMG_1820) */
+.rewards-banner { display: flex; width: 100%; padding: 20px; gap: 16px; align-items: flex-start; border: 0; border-radius: var(--radius-xl); color: var(--text-primary); background: linear-gradient(90deg, #f1f5f7, #c8e3ff); text-align: left; }
+.rewards-banner .body { display: flex; flex: 1; flex-direction: column; gap: 4px; }
+.rewards-banner .link { display: inline-flex; margin-top: 4px; gap: 6px; align-items: center; color: var(--action-primary); font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
+.coupon-art-svg { flex: none; }
+/* Popup list buttons */
+.popup-lists { display: flex; flex-direction: column; gap: 8px; }
+.popup-lists > p { text-align: center; }
+.popup-list-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.popup-list-buttons .btn { width: 100%; padding: 0 6px; font-size: 15px; }
+/* Savings › Coupons (IMG_1815–1817) */
+.savings-page { padding-top: 59px; background: var(--surface-card); }
+.checked-in .savings-page { padding-top: 117px; }
+.savings-head { position: sticky; z-index: 8; top: 59px; padding-bottom: 14px; background: linear-gradient(180deg, #ddeaf6, #e1eefc); box-shadow: var(--header-shadow); }
+.checked-in .savings-head { top: 117px; }
+.savings-head .bar { display: flex; height: 56px; padding: 0 16px; gap: 12px; align-items: center; }
+.savings-head .title { flex: 1; font-family: "Inter:Regular", Inter, sans-serif; font-size: 22px; line-height: 28px; font-weight: 400; }
+.header-round.white { background: var(--surface-card); box-shadow: var(--elevation-1); }
+.savings-search { display: flex; height: 46px; margin: 0 16px; padding: 0 12px; gap: 10px; align-items: center; border-radius: 10px; background: var(--surface-card); box-shadow: var(--elevation-1); }
+.savings-search input { min-width: 0; flex: 1; height: 100%; border: 0; background: transparent; font-size: 17px; outline: 0; -webkit-appearance: none; appearance: none; }
+.savings-search input::placeholder { color: var(--text-secondary); }
+.savings-search input::-webkit-search-cancel-button { display: none; }
+.savings-search .clear { display: grid; width: 36px; height: 36px; padding: 0; place-items: center; border: 0; background: transparent; }
+.savings-content { gap: 18px; }
+.coupons-head { display: flex; align-items: center; justify-content: space-between; }
+.segmented.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.segmented.three button { font-size: 16px; }
+.coupons-tools { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.sort-button { font-family: "Inter:Regular", Inter, sans-serif !important; font-weight: 400 !important; font-size: 17px !important; }
+.sort-button svg { color: var(--text-primary); }
+/* CVS R43 coupon card — measured from IMG_1817 */
+.cvs-coupon { padding: 20px 20px 18px 28px; gap: 14px; border: 1px solid #e6e6e6; border-radius: 10px; box-shadow: 0 2px 6px rgb(0 0 0 / 14%); }
+.coupon-main { gap: 28px; }
+.coupon-art { flex: none; padding-top: 4px; }
+.coupon-copy { gap: 8px; }
+.coupon-amount { font-size: 28px; line-height: 34px; }
+.coupon-offer { font-size: 17px; line-height: 26px; }
+.coupon-meta { margin-top: 4px; }
+.coupon-actions { align-items: flex-end; }
+.deal-button { height: 40px !important; padding: 0 18px !important; font-family: "Inter:Regular", Inter, sans-serif !important; font-weight: 400 !important; font-size: 18px !important; }
+.round-action { gap: 6px; font-size: 14px; line-height: 18px; }
+.round-action .circle { width: 42px; height: 42px; }

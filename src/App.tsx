@@ -109,7 +109,7 @@ const checkinMode = new URLSearchParams(window.location.search).get("checkin");
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /*
-  EXT E19 Live pickup estimate. The estimate starts at 12 min and counts down while the shopper uses the app.
+  EXT E26 Live pickup estimate. The estimate starts at 12 min and counts down while the shopper uses the app.
   Prototype pace: one estimate minute passes every 15 seconds, so a full wait fits in a 3-minute test session.
   ?pace=real runs it at real time (60 s per minute).
 */
@@ -645,7 +645,7 @@ function SegmentedControl({ selected, onSelect, label }: { selected: ShopView; o
 
 /* CVS R22 Deal tag — yellow tag with heart (IMG_1769 "extra big deals"); the label carries this item's coupon */
 /*
-  EXT E23 Coupon "clips" to the card — the yellow tag changes in place to a check and "On your card" when its item is
+  EXT E30 Coupon "clips" to the card — the yellow tag changes in place to a check and "On your card" when its item is
   added, the way CVS's "Send to card" pill turns into a sent state (IMG_1769). The Scan in store button answers it.
 */
 function DealTag({ children, onCard = false }: { children: React.ReactNode; onCard?: boolean }) {
@@ -1013,7 +1013,7 @@ function PrivateInfoSheet({ close }: { close: () => void }) {
   Checked-in details — current CVS confirmation + visit-details layout (ScreenRecording 11-33-18 "Sonakshi is all set" /
   "Visit Details", IMG_1804 "Looking for other options?"), with extensions E3 (green check) and E4 (progress card).
 */
-/* EXT E4 Pickup timeline — CVS step-progress pattern (Checked in › Preparing › Ready) driven by the live estimate */
+/* EXT E26 Pickup timeline — CVS step-progress pattern (Checked in › Preparing › Ready) driven by the live estimate */
 function PickupTimeline({ pickup }: { pickup: Pickup }) {
   const step = pickup.ready ? 3 : 2;
   const steps = ["Checked in", "Preparing", "Ready"];
@@ -1028,7 +1028,7 @@ function PickupTimeline({ pickup }: { pickup: Pickup }) {
   );
 }
 
-/* CVS R45 Category card (IMG_1792 "Shop by category"): circle image, bold label, one-line description. The coupon card uses the same parts laid out in a row so the three shopping options read as one group (similarity). */
+/* EXT E28 — CVS R45 Category card (IMG_1792 "Shop by category"): circle image, bold label, one-line description. The coupon card uses the same parts laid out in a row so the three shopping options read as one group (similarity). */
 function ShopCard({ title, caption, art, tone, wide = false, onClick }: { title: string; caption: string; art: React.ReactNode; tone: "rose" | "blue" | "teal"; wide?: boolean; onClick: () => void }) {
   return (
     <button type="button" className={`shop-card${wide ? " wide" : ""}`} onClick={onClick}>
@@ -1053,7 +1053,7 @@ function Status({ goBack, navigate, goShop, identity, preferences, checkedInAt, 
       <AppHeader title="Check-In Details" back={goBack} />
       <main className="content flow">
         <p className="sr-only" role="status">{announce ? `You're checked in. The pharmacy team at CVS 4471 knows you're here.` : ""}</p>
-        {/* EXT E3 Compact confirmation — green check + heading, with the live pickup timeline underneath */}
+        {/* EXT E27 Compact confirmation — green check + heading, with the live pickup timeline underneath */}
         <section className="checkin-summary" aria-labelledby="confirm-title">
           <div className="summary-head">
             <span className="confirm-mark" aria-hidden="true"><Icon name="check" size={18} /></span>
@@ -1244,7 +1244,7 @@ function Chat({ goBack, messages, topic, typing, send, shareLanguage, preference
   );
 }
 
-/* Product packshots — the product photos the CVS app shows, on white, centred, uncropped (IMG_1765, IMG_1769, IMG_1795) */
+/* EXT E33 Product packshots — the product photos the CVS app shows, on white, centred, uncropped (IMG_1765, IMG_1769, IMG_1795) */
 function Packshot({ product, size = 108 }: { product: Product; size?: number }) {
   return <img className="packshot" src={product.image} alt="" width={size} height={size} />;
 }
@@ -1414,7 +1414,7 @@ const shopCategories: { name: string; image: string }[] = [
 
 /*
   Shop — the current app's Shop tab (IMG_1790 header, search, location bar, "Spooky season" banner, Extra Big Deals
-  promo; IMG_1792 "Shop by category"). EXT E24 adds one section at the top while the shopper is checked in:
+  promo; IMG_1792 "Shop by category"). EXT E29 adds one section at the top while the shopper is checked in:
   "Shop while you wait", with the Buy it again / Frequently bought lists. The check-in screen's two cards jump here.
 */
 function Shop({ goBack, navigate, quantities, itemCount, toggle, view, setView, query, setQuery, locate, checkedIn, pickup, jump }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; itemCount: number; toggle: (id: number) => void; view: ShopView; setView: (view: ShopView) => void; query: string; setQuery: (query: string) => void; locate: (product: Product) => void; checkedIn: boolean; pickup: Pickup; jump: boolean }) {
@@ -1452,7 +1452,7 @@ function Shop({ goBack, navigate, quantities, itemCount, toggle, view, setView, 
         </main>
       ) : (
         <main className="content shop-content">
-          {/* EXT E24 Shop while you wait — CVS R9 section title, R5 segmented control, R21 product rows */}
+          {/* EXT E29 Shop while you wait — CVS R9 section title, R5 segmented control, R21 product rows */}
           <section ref={sectionRef} id="while-you-wait-lists" className="wait-section" aria-labelledby="wait-title">
             <div className="stack-4">
               <h2 id="wait-title" className="t-title">{checkedIn ? "Shop while you wait" : "Your CVS items"}</h2>
@@ -1692,7 +1692,7 @@ function Done({ finish, quantities, extraBucks }: { finish: () => void; quantiti
   CVS "Scan in store" floating button (ScreenRecording 11-28-01: Home and Shop). Same gradient pill, icon,
   position above the tab bar, collapse to an icon-only circle on scroll down, and the white light that sweeps
   across it three times when a screen opens, as in the current app.
-  EXT E18: a supporting savings tracker, not a checkout path. Once coupons are on the card, the
+  EXT E31: a supporting savings tracker, not a checkout path. Once coupons are on the card, the
   label shows what they save ("Saving $7.50"); the amount counts up and the light sweeps once when a coupon is
   added. Tapping it opens Savings (All coupons, or On card once coupons are saving). The collapsed circle carries
   the coupon count in the CVS red count badge. It never opens the checkout code; paying always goes through

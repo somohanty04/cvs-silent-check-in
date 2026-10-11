@@ -151,7 +151,7 @@ strong, b { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
 .pickup-strip .copy .t-caption { color: var(--text-secondary); line-height: 18px; }
 .pickup-strip .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--cvs-stock-green); }
 .pickup-strip svg { color: var(--action-primary); }
-/* EXT E19 live estimate: hairline progress along the strip's bottom edge; turns green with a check when ready */
+/* EXT E26 live estimate: hairline progress along the strip's bottom edge; turns green with a check when ready */
 .pickup-strip { position: relative; }
 .strip-progress { position: absolute; right: 0; bottom: -1px; left: 0; height: 3px; overflow: hidden; }
 .strip-progress i { display: block; height: 100%; transform-origin: left; background: var(--action-primary); transition: transform 1s linear; }
@@ -311,7 +311,7 @@ strong, b { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
 /* CVS R22 Deal tag */
 .deal-tag { display: inline-flex; width: fit-content; height: 24px; padding: 0 10px 0 14px; gap: 4px; align-items: center; color: var(--text-primary); background: var(--cvs-deal-yellow); clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%); border-radius: 0 4px 4px 0; font-family: "Inter:Bold", Inter, sans-serif; font-size: 13px; line-height: 16px; font-weight: 700; white-space: nowrap; }
 .deal-tag svg { fill: currentColor; stroke: none; }
-/* EXT E23 tag flips in place to "On your card" (check replaces the heart); same yellow tag so it still reads as the coupon */
+/* EXT E30 tag flips in place to "On your card" (check replaces the heart); same yellow tag so it still reads as the coupon */
 .deal-tag-face { display: inline-flex; gap: 4px; align-items: center; }
 .deal-tag.on-card .deal-tag-face { animation: tag-flip 0.32s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
 .deal-tag.on-card svg { fill: none; stroke: currentColor; stroke-width: 2.4; }
@@ -384,7 +384,7 @@ strong, b { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
 .promo-card { display: flex; padding: 20px; flex-direction: column; gap: 12px; border-radius: var(--radius-xl); background: var(--cvs-promo-yellow); }
 
 /* CVS R31 Sticky action footer + cart dock */
-/* Floating cart button: no backing band, just the CVS primary pill with a soft shadow, like the app's other floating buttons */
+/* EXT E32 Floating cart button: no backing band, just the CVS primary pill with a soft shadow, like the app's other floating buttons */
 .cart-dock { position: fixed; z-index: 18; right: 0; bottom: calc(110px + env(safe-area-inset-bottom)); left: 0; max-width: 48rem; margin: 0 auto; padding: 0 16px; pointer-events: none; }
 .cart-dock .btn { pointer-events: auto; box-shadow: 0 6px 16px rgb(0 0 0 / 22%); }
 .sticky-footer { position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; display: flex; max-width: 48rem; margin: 0 auto; padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); flex-direction: column; gap: 8px; background: rgb(255 255 255 / 94%); box-shadow: 0 -6px 16px rgb(0 0 0 / 8%); backdrop-filter: blur(12px); }
@@ -512,10 +512,10 @@ strong, b { font-family: "Inter:Bold", Inter, sans-serif; font-weight: 700; }
 .checkin-entry .body { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; }
 .checkin-entry .link { margin-top: 4px; }
 
-/* CVS "Scan in store" floating button (ScreenRecording 11-28-01) — gradient sampled from the recording; EXT E18 savings label, count-up and glow */
+/* CVS "Scan in store" floating button (ScreenRecording 11-28-01) — gradient sampled from the recording; EXT E31 savings label, count-up and glow */
 .scan-store { position: fixed; z-index: 29; right: max(16px, calc(50% - 24rem + 16px)); bottom: calc(112px + env(safe-area-inset-bottom)); display: flex; height: 48px; padding: 0 18px 0 14px; align-items: center; border: 0; border-radius: 999px; color: var(--text-inverse); background: linear-gradient(115deg, #3a92f5 0%, #2877d3 45%, #0b52a0 100%); /* exact CVS colours sampled from the recording (existing CVS component, kept as is) */ box-shadow: 0 6px 18px rgb(23 92 190 / 38%), inset 0 1px 0 rgb(255 255 255 / 28%); transition: padding 0.25s ease, bottom 0.25s ease, transform 0.15s ease; }
 .scan-store:active { transform: scale(0.96); }
-/* EXT E23 the button "catches" the coupon: one small squash-and-settle, then the sweep and count-up */
+/* EXT E31 the button "catches" the coupon: one small squash-and-settle, then the sweep and count-up */
 .scan-store.caught { animation: scan-catch 0.5s cubic-bezier(0.3, 0.7, 0.4, 1); }
 @keyframes scan-catch { 0% { transform: scale(1); } 30% { transform: scale(1.08, 0.94); } 60% { transform: scale(0.97, 1.03); } 100% { transform: scale(1); } }
 .scan-store.raised { bottom: calc(166px + env(safe-area-inset-bottom)); }
@@ -617,7 +617,7 @@ fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .activity-foot { padding: 0 16px 14px; color: var(--text-secondary); }
 
 /* ---------- Shop v3: packshots, coupons, cards (matched to IMG_1765, IMG_1787, IMG_1792, IMG_1817) ---------- */
-/* EXT E22 packshots sit on white, uncropped, like the app's product photography */
+/* EXT E33 packshots sit on white, uncropped, like the app's product photography */
 .packshot { display: block; flex: none; object-fit: contain; background: #fff; }
 .product-image { width: 112px; height: 112px; background: #fff; }
 .product-row .row-actions { flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -721,7 +721,7 @@ fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .shop-card-circle.teal { background: var(--cvs-send-card); }
 .shop-card-circle .packshot { width: 52px; height: 52px; object-fit: contain; mix-blend-mode: multiply; }
 
-/* ---------- Shop tab (IMG_1790, IMG_1792) with EXT E24 "Shop while you wait" section ---------- */
+/* ---------- Shop tab (IMG_1790, IMG_1792) with EXT E29 "Shop while you wait" section ---------- */
 .shop-content { gap: 20px; }
 .wait-section { display: flex; flex-direction: column; gap: 12px !important; scroll-margin-top: 176px; }
 .checked-in .wait-section { scroll-margin-top: 234px; }

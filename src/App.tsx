@@ -140,7 +140,7 @@ const pickupLine = (pickup: Pickup) => (pickup.ready ? "Ready now · Register 2"
 type IconName =
   | "back" | "chevron" | "chevronDown" | "search" | "barcode" | "mic" | "check" | "minus" | "plus" | "info" | "close" | "send" | "cart" | "cartPlus" | "trash"
   | "warning" | "edit" | "sliders" | "doc" | "chat" | "clock" | "pin" | "mail" | "profile" | "muted" | "globe" | "rx" | "heart" | "tag"
-  | "homeRed" | "rxRed" | "healthRed" | "shopTagRed" | "benefitsRed" | "savings" | "shopBag" | "photo" | "orders" | "scanStore";
+  | "homeRed" | "rxRed" | "healthRed" | "shopTagRed" | "benefitsRed" | "savings" | "shopBag" | "photo" | "orders" | "scanStore" | "buyAgain" | "frequentlyBought";
 
 const icons: Record<IconName, { vb: number; body: React.ReactNode }> = {
   back: { vb: 24, body: <path d="M15 5L8 12L15 19" /> },
@@ -184,6 +184,10 @@ const icons: Record<IconName, { vb: number; body: React.ReactNode }> = {
   photo: { vb: 24, body: <><rect x="3" y="5" width="18" height="14" rx="1.5" /><circle cx="9" cy="10" r="1.6" /><path d="M3 17L8 13L12 16L15 14L21 18" /></> },
   orders: { vb: 24, body: <><path d="M6 3H18V21L15 19L12 21L9 19L6 21V3Z" /><path d="M9 8H15M9 12H15M9 16H12" /></> },
   // "Scan in store" button icon (ScreenRecording 11-28-01) — register with barcode and a card
+  // "While you wait" card icons — drawn in the style of the red tab icons (IMG_1785, IMG_1790): 1.5 stroke line art + small filled heart.
+  // Buy it again = a redo arrow around the Shop bag; Frequently bought = the Orders receipt (purchase history) with the heart.
+  buyAgain: { vb: 24, body: <><path d="M18 6A8.5 8.5 0 1 1 9.8 3.8" /><path d="M7.9 2.6L10.3 3.7L8.8 5.8" /><path d="M8.5 11H15.5L15 17.5H9L8.5 11Z" /><path d="M10.5 11V10a1.5 1.5 0 0 1 3 0v1" /><path d="M11.02 13.6c.42-.49.98-.42.98.14 0-.56.56-.63.98-.14.49.56-.98 1.68-.98 1.68s-1.47-1.12-.98-1.68Z" fill="currentColor" stroke="none" /></> },
+  frequentlyBought: { vb: 24, body: <><path d="M6 3H18V21L15 19L12 21L9 19L6 21V3Z" /><path d="M9 7.5H15M9 11H15" /><path d="M10.6 13.8c.6-.7 1.4-.6 1.4.2 0-.8.8-.9 1.4-.2.7.8-1.4 2.4-1.4 2.4s-2.1-1.6-1.4-2.4Z" fill="currentColor" stroke="none" /></> },
   scanStore: { vb: 24, body: <><path d="M3.5 10.5H20.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19v-8.5Z" /><path d="M6 10.5L8 4.5H17.5L16 10.5" /><path d="M7 13.5v4M9.5 13.5v4M12 13.5v4M14.5 13.5v4M17 13.5v4" /></> },
 };
 
@@ -1067,8 +1071,8 @@ function Status({ goBack, navigate, goShop, identity, preferences, checkedInAt, 
         <section aria-labelledby="while-you-wait" className="while-you-wait">
           <SectionTitle id="while-you-wait" title="While you wait" />
           <div className="shop-cards">
-            <ShopCard tone="rose" title="Buy it again" caption="Items you usually buy around now" art={<Packshot product={buyAgain[0]} size={60} />} onClick={() => goShop("low", "forward", true)} />
-            <ShopCard tone="blue" title="Frequently bought" caption="Everything you've bought here" art={<Packshot product={frequentlyBought[0]} size={60} />} onClick={() => goShop("frequent", "forward", true)} />
+            <ShopCard tone="rose" title="Buy it again" caption="Items you usually buy around now" art={<Icon name="buyAgain" size={40} />} onClick={() => goShop("low", "forward", true)} />
+            <ShopCard tone="blue" title="Frequently bought" caption="Everything you've bought here" art={<Icon name="frequentlyBought" size={40} />} onClick={() => goShop("frequent", "forward", true)} />
             {couponStatus === "ready" && <ShopCard wide tone="teal" title={`${offers.length} coupons for you`} caption={`Up to $${offersTotal.toFixed(2)} off items you buy`} art={<CouponArt size={40} />} onClick={() => goShop("deals", "forward", true)} />}
           </div>
           {couponStatus === "loading" && <div className="loading-line t-body c-secondary" role="status"><Spinner size={20} />Loading your coupons…</div>}

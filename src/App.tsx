@@ -10,7 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 */
 
 type Screen = "home" | "visit" | "identity" | "questions" | "communication" | "review" | "status" | "canceled" | "messages" | "chat" | "shop" | "savings" | "order" | "ready" | "done";
-type ShopView = "low" | "frequent";
+type ShopView = "low" | "frequent" | "deals";
 type CouponStatus = "loading" | "ready" | "error" | "none";
 type ChatTopic = "question" | "private" | "meet" | "language" | "free";
 type ChatMessage = { from: "me" | "pharmacy"; text: string };
@@ -37,7 +37,7 @@ type Product = {
   coupon?: string;
   lastBought?: string;
   timesBought?: number;
-  low?: "Possibly out" | "Getting close";
+  dueAgain?: boolean;
   aisle: string;
   shelf: "Top shelf" | "Eye level" | "Middle shelf" | "Bottom shelf";
   section: string;
@@ -46,33 +46,34 @@ type Product = {
 };
 
 /*
-  Product data. Items with lastBought are the shopper's purchase history:
-  - Frequently bought = every item bought here before (so running-low items appear here too).
-  - Running low = history items that may be running out, based on when they were last bought.
+  Product data. Every product, name, packshot and shelf price comes from the designer's CVS app screenshots
+  (IMG_1765, IMG_1766, IMG_1768, IMG_1769, IMG_1794, IMG_1795, IMG_1798, IMG_1818, ScreenRecording 11-28-01).
+  Coupon amounts, purchase history and aisle locations are prototype data. For coupon items, original = shelf price.
+  Items with lastBought are the shopper's purchase history:
+  - Frequently bought = every item bought here before.
+  - Buy it again = history items the shopper usually rebuys around now, based on how often they buy them.
   Items without lastBought are only reachable through search.
 */
 const products: Product[] = [
-  { id: 1, name: "CVS Health Vitamin D3, 200 ct", price: "$8.49", original: "$10.49", coupon: "$2 off", lastBought: "10 weeks ago", timesBought: 6, low: "Possibly out", aisle: "Aisle 12", shelf: "Eye level", section: "Section B", image: "products/vitamins.jpg", keywords: "vitamins supplement" },
-  { id: 2, name: "Nature's Bounty Fish Oil, 130 ct", price: "$17.99", original: "$21.99", coupon: "$4 off", lastBought: "9 weeks ago", timesBought: 4, low: "Possibly out", aisle: "Aisle 12", shelf: "Middle shelf", section: "Section C", image: "products/tablets.jpg", keywords: "vitamins supplement omega" },
-  { id: 3, name: "Tylenol Extra Strength, 100 ct", price: "$9.99", lastBought: "7 weeks ago", timesBought: 3, low: "Getting close", aisle: "Aisle 9", shelf: "Eye level", section: "Section A", image: "products/medicine.jpg", keywords: "pain relief medicine acetaminophen" },
-  { id: 4, name: "Neutrogena Hydro Boost Moisturizer", price: "$16.99", original: "$19.99", coupon: "$3 off", lastBought: "6 weeks ago", timesBought: 5, low: "Getting close", aisle: "Aisle 4", shelf: "Top shelf", section: "Section D", image: "products/skincare.jpg", keywords: "skincare face lotion" },
-  { id: 5, name: "CeraVe Daily Moisturizing Lotion", price: "$14.49", lastBought: "5 weeks ago", timesBought: 7, aisle: "Aisle 4", shelf: "Middle shelf", section: "Section B", image: "products/cream.jpg", keywords: "skincare body lotion" },
-  { id: 6, name: "CVS Health Allergy Relief, 30 ct", price: "$12.79", original: "$15.79", coupon: "$3 off", lastBought: "3 months ago", timesBought: 3, low: "Getting close", aisle: "Aisle 8", shelf: "Eye level", section: "Section C", image: "products/tablets.jpg", keywords: "allergy medicine" },
-  { id: 7, name: "Aveeno Daily Body Wash", price: "$10.99", lastBought: "4 weeks ago", timesBought: 8, aisle: "Aisle 5", shelf: "Bottom shelf", section: "Section A", image: "products/personal-care.jpg", keywords: "soap shower" },
-  { id: 8, name: "CVS Health Daily Probiotic, 30 ct", price: "$18.49", original: "$22.49", coupon: "$4 off", lastBought: "11 weeks ago", timesBought: 4, low: "Possibly out", aisle: "Aisle 13", shelf: "Middle shelf", section: "Section A", image: "products/vitamins.jpg", keywords: "vitamins supplement digestive" },
-  { id: 9, name: "Pringles Original Potato Crisps", price: "$2.99", original: "$3.79", coupon: "80¢ off", lastBought: "2 weeks ago", timesBought: 12, aisle: "Aisle 18", shelf: "Eye level", section: "Section C", image: "products/snacks.jpg", keywords: "chips snacks food" },
-  { id: 10, name: "e.l.f. Power Grip Face Primer", price: "$9.00", lastBought: "2 months ago", timesBought: 2, aisle: "Aisle 3", shelf: "Middle shelf", section: "Section B", image: "products/makeup.jpg", keywords: "makeup beauty cosmetics" },
-  { id: 11, name: "Total Home Paper Towels, 6 rolls", price: "$11.99", original: "$14.99", coupon: "$3 off", lastBought: "7 weeks ago", timesBought: 9, low: "Getting close", aisle: "Aisle 16", shelf: "Bottom shelf", section: "Section A", image: "products/paper.jpg", keywords: "household cleaning" },
-  { id: 12, name: "Colgate Total Whitening Toothpaste", price: "$5.49", original: "$6.99", coupon: "$1.50 off", lastBought: "5 weeks ago", timesBought: 10, low: "Getting close", aisle: "Aisle 6", shelf: "Eye level", section: "Section D", image: "products/personal-care.jpg", keywords: "dental oral care teeth" },
-  { id: 13, name: "Pringles Sour Cream & Onion Crisps", price: "$2.99", aisle: "Aisle 18", shelf: "Eye level", section: "Section C", image: "products/snacks.jpg", keywords: "chips snacks food" },
-  { id: 14, name: "Advil Ibuprofen Tablets, 100 ct", price: "$13.49", aisle: "Aisle 9", shelf: "Eye level", section: "Section B", image: "products/medicine.jpg", keywords: "pain relief medicine" },
-  { id: 15, name: "CVS Health Multivitamin, 100 ct", price: "$11.49", aisle: "Aisle 12", shelf: "Top shelf", section: "Section A", image: "products/vitamins.jpg", keywords: "vitamins supplement" },
-  { id: 16, name: "Band-Aid Flexible Fabric Bandages, 30 ct", price: "$5.99", aisle: "Aisle 10", shelf: "Middle shelf", section: "Section C", image: "products/personal-care.jpg", keywords: "first aid bandage" },
-  { id: 17, name: "Lay's Classic Potato Chips", price: "$4.29", aisle: "Aisle 18", shelf: "Top shelf", section: "Section B", image: "products/snacks.jpg", keywords: "chips snacks food" },
+  { id: 1, name: "CVS Health B Complex + Energy Gummies, 60 ct", price: "$9.19", original: "$11.19", coupon: "$2 off", lastBought: "9 weeks ago", timesBought: 6, dueAgain: true, aisle: "Aisle 12", shelf: "Eye level", section: "Section B", image: "products/real/cvs-vitamin-b-energy-gummy.png", keywords: "vitamins supplement gummy energy" },
+  { id: 2, name: "Natrol Methyl B-12 Tablets, Lemon, 60 ct", price: "$10.99", original: "$13.99", coupon: "$3 off", lastBought: "8 weeks ago", timesBought: 4, dueAgain: true, aisle: "Aisle 12", shelf: "Middle shelf", section: "Section C", image: "products/real/natrol-methyl-b12-lemon.png", keywords: "vitamins supplement b12" },
+  { id: 3, name: "Vicks PainQuil Nighttime Pain Reliever & Sleep Aid, Honey, 12 fl oz", price: "$13.79", lastBought: "7 weeks ago", timesBought: 3, dueAgain: true, aisle: "Aisle 9", shelf: "Eye level", section: "Section A", image: "products/real/vicks-painquil-nighttime.png", keywords: "pain relief medicine sleep night" },
+  { id: 4, name: "Cepacol Extra Strength Sore Throat & Cough Lozenges, Mixed Berry, 16 ct", price: "$4.19", original: "$5.69", coupon: "$1.50 off", lastBought: "6 weeks ago", timesBought: 5, dueAgain: true, aisle: "Aisle 8", shelf: "Eye level", section: "Section C", image: "products/real/cepacol-extra-strength-lozenges.png", keywords: "cold cough sore throat medicine" },
+  { id: 5, name: "Gain Liquid Laundry Detergent, Original, 81 fl oz", price: "$7.99", original: "$9.99", coupon: "$2 off", lastBought: "7 weeks ago", timesBought: 9, dueAgain: true, aisle: "Aisle 16", shelf: "Bottom shelf", section: "Section A", image: "products/real/gain-liquid-detergent-original.png", keywords: "household laundry cleaning" },
+  { id: 6, name: "Biofreeze Ultraflex Lidocaine + Menthol Patch, 4 ct", price: "$13.49", original: "$17.49", coupon: "$4 off", lastBought: "10 weeks ago", timesBought: 3, dueAgain: true, aisle: "Aisle 10", shelf: "Middle shelf", section: "Section B", image: "products/real/biofreeze-ultraflex-patch.png", keywords: "pain relief patch" },
+  { id: 7, name: "Vicks VapoInhaler On-the-Go Portable Inhaler, Menthol", price: "$7.99", original: "$11.99", coupon: "$4 off", lastBought: "3 months ago", timesBought: 2, aisle: "Aisle 8", shelf: "Top shelf", section: "Section C", image: "products/real/vicks-vapoinhaler.png", keywords: "cold congestion medicine" },
+  { id: 8, name: "CVS Health Menthol 5% Pain Relief Roll-On Gel, 3 fl oz", price: "$10.49", original: "$13.49", coupon: "$3 off", lastBought: "4 weeks ago", timesBought: 7, aisle: "Aisle 10", shelf: "Eye level", section: "Section A", image: "products/real/cvs-menthol-roll-on-gel.png", keywords: "pain relief gel" },
+  { id: 9, name: "ThermaCare Heat & Lidocaine Spray, 3 oz", price: "$16.49", lastBought: "2 months ago", timesBought: 2, aisle: "Aisle 10", shelf: "Top shelf", section: "Section D", image: "products/real/thermacare-heat-lidocaine-spray.png", keywords: "pain relief spray" },
+  { id: 10, name: "Revlon Glimmer Super Balm, Just A Girl", price: "$10.99", original: "$13.99", coupon: "$3 off", lastBought: "5 weeks ago", timesBought: 4, aisle: "Aisle 3", shelf: "Eye level", section: "Section B", image: "products/real/revlon-glimmer-super-balm.png", keywords: "makeup beauty cosmetics lip" },
+  { id: 11, name: "Moira Icy Glow Jelly Stick, 003 Peach Sour", price: "$8.99", lastBought: "2 months ago", timesBought: 2, aisle: "Aisle 3", shelf: "Middle shelf", section: "Section D", image: "products/real/moira-icy-glow-jelly-stick.png", keywords: "makeup beauty cosmetics blush" },
+  { id: 12, name: "Garden Veggie Potato and Vegetable Ghosts + Bats, 12 ct", price: "$8.99", original: "$11.99", coupon: "$3 off", lastBought: "2 weeks ago", timesBought: 12, aisle: "Aisle 18", shelf: "Eye level", section: "Section C", image: "products/real/garden-veggie-chips.png", keywords: "chips snacks food halloween" },
+  { id: 13, name: "Vicks PainQuil LiquiCaps, 100 ct", price: "$22.99", aisle: "Aisle 9", shelf: "Eye level", section: "Section B", image: "products/real/vicks-painquil-liquicaps.png", keywords: "pain relief medicine" },
+  { id: 14, name: "Boiron Oscillococcinum, 6 ct", price: "$19.99", aisle: "Aisle 8", shelf: "Middle shelf", section: "Section A", image: "products/real/boiron-oscillococcinum.png", keywords: "cold flu medicine" },
+  { id: 15, name: "BinaxNOW COVID-19/Flu A&B Combo Self Test, 2 ct", price: "$21.99", aisle: "Aisle 7", shelf: "Eye level", section: "Section C", image: "products/real/binaxnow-covid-flu-test.png", keywords: "covid flu test home" },
 ];
 const history = products.filter((product) => product.lastBought);
 const frequentlyBought = [...history].sort((a, b) => (b.timesBought ?? 0) - (a.timesBought ?? 0));
-const runningLow = history.filter((product) => product.low);
+const buyAgain = history.filter((product) => product.dueAgain);
 const offers = history.filter((product) => product.original);
 const money = (value: string) => Number(value.replace("$", ""));
 const saving = (product: Product) => (product.original ? money(product.original) - money(product.price) : 0);
@@ -103,9 +104,33 @@ const items = (count: number) => `${count} ${count === 1 ? "item" : "items"}`;
 
 /* Prototype test modes for the coupon request (not shown in the interface): ?coupons=error or ?coupons=none */
 const couponMode = new URLSearchParams(window.location.search).get("coupons");
-/* ?checkin=error fails the first check-in attempt (shows the check-in failure state; no coupon popup) */
+/* ?checkin=error fails the first check-in attempt (shows the check-in failure state) */
 const checkinMode = new URLSearchParams(window.location.search).get("checkin");
 const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/*
+  EXT E19 Live pickup estimate. The estimate starts at 12 min and counts down while the shopper uses the app.
+  Prototype pace: one estimate minute passes every 15 seconds, so a full wait fits in a 3-minute test session.
+  ?pace=real runs it at real time (60 s per minute).
+*/
+const PICKUP_MINUTES = 12;
+const SECONDS_PER_MINUTE = new URLSearchParams(window.location.search).get("pace") === "real" ? 60 : 15;
+type Pickup = { minutesLeft: number; progress: number; ready: boolean };
+function usePickup(active: boolean, since: Date): Pickup {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!active) return;
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [active, since]);
+  const elapsedMinutes = Math.max(0, (now - since.getTime()) / 1000 / SECONDS_PER_MINUTE);
+  const progress = Math.min(1, elapsedMinutes / PICKUP_MINUTES);
+  return { minutesLeft: Math.max(0, Math.ceil(PICKUP_MINUTES - elapsedMinutes)), progress, ready: progress >= 1 };
+}
+/* ExtraBucks Rewards available on the shopper's ExtraCare card (IMG_1815: "$0.93 Available"). Once sent to the card they come off the total at the register. */
+const EXTRABUCKS = 0.93;
+const pickupLine = (pickup: Pickup) => (pickup.ready ? "Ready now · Register 2" : `Ready in about ${pickup.minutesLeft} min`);
 
 /*
   Icons. Outline icons are drawn at a 1.5 stroke to match the current CVS app's line icons
@@ -115,7 +140,7 @@ const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)")
 type IconName =
   | "back" | "chevron" | "chevronDown" | "search" | "barcode" | "mic" | "check" | "minus" | "plus" | "info" | "close" | "send" | "cart" | "cartPlus" | "trash"
   | "warning" | "edit" | "sliders" | "doc" | "chat" | "clock" | "pin" | "mail" | "profile" | "muted" | "globe" | "rx" | "heart" | "tag"
-  | "homeRed" | "rxRed" | "healthRed" | "shopTagRed" | "benefitsRed" | "savings" | "shopBag" | "photo" | "orders";
+  | "homeRed" | "rxRed" | "healthRed" | "shopTagRed" | "benefitsRed" | "savings" | "shopBag" | "photo" | "orders" | "scanStore";
 
 const icons: Record<IconName, { vb: number; body: React.ReactNode }> = {
   back: { vb: 24, body: <path d="M15 5L8 12L15 19" /> },
@@ -158,6 +183,8 @@ const icons: Record<IconName, { vb: number; body: React.ReactNode }> = {
   shopBag: { vb: 24, body: <><path d="M5 8H19L18 21H6L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /><path d="M10.6 12.4c.6-.7 1.4-.6 1.4.2 0-.8.8-.9 1.4-.2.7.8-1.4 2.4-1.4 2.4s-2.1-1.6-1.4-2.4Z" fill="currentColor" stroke="none" /></> },
   photo: { vb: 24, body: <><rect x="3" y="5" width="18" height="14" rx="1.5" /><circle cx="9" cy="10" r="1.6" /><path d="M3 17L8 13L12 16L15 14L21 18" /></> },
   orders: { vb: 24, body: <><path d="M6 3H18V21L15 19L12 21L9 19L6 21V3Z" /><path d="M9 8H15M9 12H15M9 16H12" /></> },
+  // "Scan in store" button icon (ScreenRecording 11-28-01) — register with barcode and a card
+  scanStore: { vb: 24, body: <><path d="M3.5 10.5H20.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19v-8.5Z" /><path d="M6 10.5L8 4.5H17.5L16 10.5" /><path d="M7 13.5v4M9.5 13.5v4M12 13.5v4M14.5 13.5v4M17 13.5v4" /></> },
 };
 
 function Icon({ name, size = 24 }: { name: IconName; size?: number }) {
@@ -183,7 +210,7 @@ function StoreIllustration({ size = 32 }: { size?: number }) {
 }
 
 /* Device status bar (utility) + EXT E2 Pickup status strip (reuses the R28 location-bar layout) */
-function PhoneStatus({ pickupState }: { pickupState: "waiting" | "ready" | null }) {
+function PhoneStatus({ pickup }: { pickup: Pickup | null }) {
   const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   return (
     <div className="phone-chrome">
@@ -196,11 +223,12 @@ function PhoneStatus({ pickupState }: { pickupState: "waiting" | "ready" | null 
           <span className="battery"><i /></span>
         </div>
       </div>
-      {pickupState && (
-        <div className="pickup-strip" aria-live="polite">
+      {pickup && (
+        <div className={`pickup-strip${pickup.ready ? " ready" : ""}`}>
           <span className="dot" aria-hidden="true" />
-          <span className="copy"><b className="t-label">Pharmacy pickup</b><span className="t-caption">{pickupState === "ready" ? "Ready now · Register 2" : "Ready in about 12 min"}</span></span>
-          <Icon name={pickupState === "ready" ? "check" : "clock"} size={20} />
+          <span className="copy"><b className="t-label">Pharmacy pickup</b><span className="t-caption" aria-live="polite">{pickupLine(pickup)}</span></span>
+          <Icon name={pickup.ready ? "check" : "clock"} size={20} />
+          <span className="strip-progress" aria-hidden="true"><i style={{ transform: `scaleX(${pickup.progress})` }} /></span>
         </div>
       )}
     </div>
@@ -601,8 +629,9 @@ function StaffLanguageField({ language, other, onChange, error }: { language: st
 
 /* CVS R5 Segmented control — gray track, white selected segment (IMG_1815 "All / On card / For you") */
 const categories: { view: ShopView; label: string }[] = [
-  { view: "low", label: "Running low" },
+  { view: "low", label: "Buy it again" },
   { view: "frequent", label: "Frequently bought" },
+  { view: "deals", label: "Deals" },
 ];
 function SegmentedControl({ selected, onSelect, label }: { selected: ShopView; onSelect: (view: ShopView) => void; label: string }) {
   return (
@@ -615,8 +644,16 @@ function SegmentedControl({ selected, onSelect, label }: { selected: ShopView; o
 }
 
 /* CVS R22 Deal tag — yellow tag with heart (IMG_1769 "extra big deals"); the label carries this item's coupon */
-function DealTag({ children }: { children: React.ReactNode }) {
-  return <span className="deal-tag"><Icon name="heart" size={12} />{children}</span>;
+/*
+  EXT E23 Coupon "clips" to the card — the yellow tag changes in place to a check and "On your card" when its item is
+  added, the way CVS's "Send to card" pill turns into a sent state (IMG_1769). The Scan in store button answers it.
+*/
+function DealTag({ children, onCard = false }: { children: React.ReactNode; onCard?: boolean }) {
+  return (
+    <span className={`deal-tag${onCard ? " on-card" : ""}`}>
+      <span key={onCard ? "on" : "off"} className="deal-tag-face">{onCard ? <><Icon name="check" size={12} />On your card</> : <><Icon name="heart" size={12} />{children}</>}</span>
+    </span>
+  );
 }
 
 /* CVS R33 Price block — red "SALE" label and red sale price with the regular price struck through (IMG_1795, IMG_1769). The app's separate black price line is left out because it repeats the sale price. */
@@ -643,7 +680,7 @@ function CouponState({ product, inCart }: { product: Product; inCart: boolean })
   if (!product.coupon) return null;
   return (
     <p className={`coupon-state${inCart ? " added" : ""}`}>
-      {inCart ? <><span className="mark" aria-hidden="true"><Icon name="check" size={12} /></span>Coupon added: saves ${saving(product).toFixed(2)}</> : <>Coupon available: save ${saving(product).toFixed(2)}</>}
+      {inCart ? <><span className="mark" aria-hidden="true"><Icon name="check" size={12} /></span>On your card: saves ${saving(product).toFixed(2)}</> : <>Coupon available: save ${saving(product).toFixed(2)}</>}
     </p>
   );
 }
@@ -719,34 +756,24 @@ function CartAddedSheet({ product, cartCount, subtotal, onViewCart, onContinue }
 }
 
 /* Current CVS homepage (CVS R32, IMG_1785): header actions, search, chips, Health & Pharmacy / Shop selector, Activity, Discover more */
-function StethoscopeIllustration() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <rect x="3" y="11" width="7" height="11" rx="1.5" fill="#EC6A2C" />
-      <rect x="2.5" y="8.5" width="8" height="3" rx="1" fill="#F2A27C" />
-      <path d="M5 16h3M6.5 14.5v3" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M12 4v6a4.5 4.5 0 0 0 9 0V4" stroke="#1E4B94" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M16.5 14.5v3a4 4 0 0 0 4 4" stroke="#1E4B94" strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="22.5" cy="21.5" r="2.5" stroke="#4FB3A5" strokeWidth="1.6" />
-    </svg>
-  );
-}
-function BasketIllustration() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <path d="M3 11h18l-2 11H5L3 11Z" fill="#8F8C89" />
-      <path d="M7 11l3-6M17 11l-3-6" stroke="#5E5D5A" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M7 14v5M10.5 14v5M14 14v5M17.5 14v5" stroke="#DBD8D5" strokeWidth="1.2" />
-      <rect x="17" y="15" width="9" height="7" rx="1.5" transform="rotate(-18 17 15)" fill="#F2EFEB" stroke="#5E5D5A" strokeWidth="1" />
-      <path d="M20 19.5l3-1" stroke="#5E5D5A" strokeWidth="1" />
-    </svg>
-  );
+/* Area selector icons — the app's own artwork, cropped from IMG_1785 and ScreenRecording 11-28-01: full colour when selected, grey when not */
+function AreaIcon({ area, selected }: { area: "health" | "shop"; selected: boolean }) {
+  return <img className={`area-icon ${area}`} src={`home/icon-${area}-${selected ? "on" : "off"}.png`} alt="" width={32} height={area === "health" ? 25 : 21} />;
 }
 
-function Home({ navigate, cartCount, checkedIn }: { navigate: (screen: Screen) => void; cartCount: number; checkedIn: boolean }) {
-  const [surface, setSurface] = useState<"health" | "shop">("health");
+function Home({ navigate, cartCount, checkedIn, pickup }: { navigate: (screen: Screen) => void; cartCount: number; checkedIn: boolean; pickup: Pickup }) {
+  // The area selector pins under the status bar once the header scrolls away (ScreenRecording 11-28-01, 0:02).
+  const [stuck, setStuck] = useState(false);
+  const selectorRef = useRef<HTMLDivElement>(null);
+  const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const node = selectorRef.current;
+    if (!node) return;
+    // Sticky offsets are measured inside the page's top padding (status bar, and the pickup bar when checked in).
+    const stickTop = (parseFloat(getComputedStyle(event.currentTarget).paddingTop) || 0) + (parseFloat(getComputedStyle(node).top) || 0);
+    setStuck(node.getBoundingClientRect().top <= stickTop + 0.5);
+  };
   return (
-    <div className="page home-page">
+    <div className="page home-page" onScroll={onScroll}>
       <header className="home-head">
         <div className="home-actions">
           <button className="home-round" aria-label="Account"><Icon name="profile" size={20} /></button>
@@ -763,30 +790,41 @@ function Home({ navigate, cartCount, checkedIn }: { navigate: (screen: Screen) =
           <span className="mic" aria-hidden="true"><Icon name="mic" size={16} /></span>
         </button>
         <div className="home-chips"><button className="home-chip">Vaccines</button><button className="home-chip">Find a store</button><button className="home-chip">Photo</button><button className="home-chip">Weekly Ad</button></div>
-        <div className="home-selector" role="group" aria-label="Choose an area">
-          <button aria-pressed={surface === "health"} onClick={() => setSurface("health")}><StethoscopeIllustration /> Health & Pharmacy</button>
-          <button aria-pressed={surface === "shop"} onClick={() => setSurface("shop")}><BasketIllustration /> Shop</button>
-        </div>
       </header>
+      <div ref={selectorRef} className={`home-selector${stuck ? " stuck" : ""}`} role="group" aria-label="Choose an area">
+        <button aria-pressed="true"><AreaIcon area="health" selected /> Health & Pharmacy</button>
+        {/* Shop area is not part of this prototype (inactive, as in the brief) */}
+        <button aria-pressed="false" aria-label="Shop (not part of this prototype)"><AreaIcon area="shop" selected={false} /> Shop</button>
+      </div>
+      {/* Health & Pharmacy area, as in the current app: Activity + vaccine promo (IMG_1785) */}
       <main className="home-content">
-        <h2 className="t-display home-section-title">Activity</h2>
-        <div className="activity-row">
-          {/* EXT E17 "Check in to pharmacy" Activity card — current-app Activity card layout (IMG_1803 "Vaccine appointment") + E16 heart-pill icon */}
-          <button type="button" className="activity-card checkin-activity" onClick={() => navigate(checkedIn ? "status" : "visit")}>
-            <header><b className="t-heading-md">Check in to pharmacy</b></header>
-            <div className="activity-body">
-              <HeartPill size={76} />
-              <b className="t-heading-md">{checkedIn ? "You're checked in" : "2 prescriptions ready"}</b>
-            </div>
-            <span className="activity-foot t-caption">{checkedIn ? "Ready in about 12 min · CVS #4471" : "CVS Pharmacy #4471"}</span>
-          </button>
-          <article className="activity-card" aria-hidden="true">
-            <header><b className="t-heading-md">Chat with a physician</b></header>
-            <div className="activity-body"><img src="home/activity-physician.png" alt="" width={163} height={61} /><p>Get fast medical support from expert providers.</p></div>
-          </article>
-        </div>
-        <h2 className="t-display home-section-title">Discover more</h2>
-        <div className="discover-row" aria-hidden="true"><img src="home/discover-1.png" alt="" width={221} height={56} /><img src="home/discover-2.png" alt="" width={101} height={56} /></div>
+        <>
+          <h2 className="t-display home-section-title">Activity</h2>
+          <div className="activity-row">
+            {/* EXT E17 "Check in to pharmacy" Activity card — current-app Activity card layout (IMG_1803 "Vaccine appointment") + E16 heart-pill icon */}
+            <button type="button" className="activity-card checkin-activity" onClick={() => navigate(checkedIn ? "status" : "visit")}>
+              <header><b className="t-heading-md">Check in to pharmacy</b></header>
+              <div className="activity-body">
+                <HeartPill size={76} />
+                <b className="t-heading-md">{checkedIn ? (pickup.ready ? "Ready for pickup" : "You're checked in") : "2 prescriptions ready"}</b>
+              </div>
+              <span className="activity-foot t-caption">{checkedIn ? pickupLine(pickup) : "CVS Pharmacy #4471"}</span>
+            </button>
+            <article className="activity-card" aria-hidden="true">
+              <header><b className="t-heading-md">Chat with a physician</b></header>
+              <div className="activity-body"><img src="home/activity-physician.png" alt="" width={163} height={61} /><p>Get fast medical support from expert providers.</p></div>
+            </article>
+          </div>
+          <h2 className="t-display home-section-title">Discover more</h2>
+          {/* Vaccine promo (IMG_1785). The card copy sits under the tab bar in the screenshot; the title is legible there, the body line is written from the "$5 off $20" badge. */}
+          <div className="discover-row">
+            <article className="discover-card blue">
+              <img src="home/discover-vaccine.png" alt="" width={221} height={144} />
+              <b className="discover-title">Get a vaccine.</b>
+              <p>Get $5 off a $20 purchase when you get vaccinated at CVS.*</p>
+            </article>
+          </div>
+        </>
       </main>
     </div>
   );
@@ -972,113 +1010,75 @@ function PrivateInfoSheet({ close }: { close: () => void }) {
 }
 
 /*
-  EXT E5 Coupon popup (signature microinteraction): CVS R12 modal (IMG_1810) with Ready / Loading (CVS R34
-  spinner, IMG_1809) / Error (orange warning icon, IMG_1810) states, CVS R22 deal tags, CVS R3 buttons.
+  Checked-in details — current CVS confirmation + visit-details layout (ScreenRecording 11-33-18 "Sonakshi is all set" /
+  "Visit Details", IMG_1804 "Looking for other options?"), with extensions E3 (green check) and E4 (progress card).
 */
-function CouponPopup({ status, closing, onViewDeals, onShopList, onClose, onRetry }: { status: CouponStatus; closing: boolean; onViewDeals: () => void; onShopList: (view: ShopView) => void; onClose: () => void; onRetry: () => void }) {
-  const ref = useDialog<HTMLElement>(onClose);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { titleRef.current?.focus(); }, [status]);
-  const title = status === "error" ? "We couldn't load your coupons" : status === "loading" ? "Loading your coupons" : "Coupons ready while you wait";
+/* EXT E4 Pickup timeline — CVS step-progress pattern (Checked in › Preparing › Ready) driven by the live estimate */
+function PickupTimeline({ pickup }: { pickup: Pickup }) {
+  const step = pickup.ready ? 3 : 2;
+  const steps = ["Checked in", "Preparing", "Ready"];
   return (
-    <div className={`sheet-backdrop modal-backdrop ${closing ? "fade-out" : "fade-in"}`} role="presentation" onClick={onClose}>
-      <section ref={ref} tabIndex={-1} className="modal" role="dialog" aria-modal="true" aria-labelledby="coupon-title" aria-describedby="coupon-confirmation coupon-body" aria-busy={status === "loading"} onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="modal-close" onClick={onClose} aria-label="Close coupons"><Icon name="close" size={22} /></button>
-        <div id="coupon-confirmation"><Notice type="success" title="You're checked in.">The pharmacy knows you're here.</Notice></div>
-        {status === "error" && <span className="modal-icon warning" aria-hidden="true"><Icon name="warning" size={28} /></span>}
-        {status === "loading" && <span className="modal-icon"><Spinner size={44} /></span>}
-        <h2 id="coupon-title" ref={titleRef} tabIndex={-1} className="t-title">{title}</h2>
-        {status === "error" && <>
-          <p id="coupon-body" className="t-body">You're still checked in for pickup. Try again, or continue without deals. You can open them later from the check-in screen.</p>
-          <Button onClick={onRetry}>Try again</Button>
-          <Button variant="text" size="md" onClick={onClose}>Continue without deals</Button>
-        </>}
-        {status === "loading" && <p id="coupon-body" className="t-body" role="status">This takes a few seconds. You're still checked in.</p>}
-        {status === "ready" && <>
-          <p id="coupon-body" className="t-body">{offers.length} ExtraCare coupons match items you've bought before, worth up to ${offersTotal.toFixed(2)}. Add an item to your in-store cart to use its coupon.</p>
-          <ul className="modal-offers" aria-label="Some of your coupons">
-            {offers.slice(0, 3).map((product) => (
-              <li className="coupon-row" key={product.id}><DealTag>{product.coupon}</DealTag><span className="t-body">{product.name}</span></li>
-            ))}
-          </ul>
-          <Button onClick={onViewDeals}>View my deals</Button>
-          <div className="popup-lists" role="group" aria-label="Or shop your lists">
-            <p className="t-caption c-secondary">Or shop your lists</p>
-            <div className="popup-list-buttons">
-              <Button variant="secondary" size="sm" onClick={() => onShopList("low")}>Running low</Button>
-              <Button variant="secondary" size="sm" onClick={() => onShopList("frequent")}>Frequently bought</Button>
-            </div>
-          </div>
-          <Button variant="text" size="md" onClick={onClose}>Not now</Button>
-        </>}
-      </section>
+    <div className="pickup-timeline" role="group" aria-label={`Pickup progress: step ${step} of 3, ${steps[step - 1]}. ${pickupLine(pickup)}.`}>
+      <div className="track" aria-hidden="true">
+        <span className="fill" style={{ transform: `scaleX(${pickup.ready ? 1 : 0.5 * (1 + pickup.progress)})` }} />
+        {steps.map((label, index) => <i key={label} className={index < step - 1 || pickup.ready ? "done" : index === step - 1 ? "current" : ""} />)}
+      </div>
+      <div className="labels t-caption" aria-hidden="true">{steps.map((label, index) => <span key={label} className={index === step - 1 ? "current" : ""}>{label}</span>)}</div>
     </div>
+  );
+}
+
+/* CVS R45 Category card (IMG_1792 "Shop by category"): circle image, bold label, one-line description. The coupon card uses the same parts laid out in a row so the three shopping options read as one group (similarity). */
+function ShopCard({ title, caption, art, tone, wide = false, onClick }: { title: string; caption: string; art: React.ReactNode; tone: "rose" | "blue" | "teal"; wide?: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className={`shop-card${wide ? " wide" : ""}`} onClick={onClick}>
+      <span className={`shop-card-circle ${tone}`} aria-hidden="true">{art}</span>
+      <span className="shop-card-copy"><b className="t-heading-sm">{title}</b><span className="t-caption">{caption}</span></span>
+      {wide && <Icon name="chevron" size={20} />}
+    </button>
   );
 }
 
 /*
   Checked-in details — current CVS confirmation + visit-details layout (ScreenRecording 11-33-18 "Sonakshi is all set" /
-  "Visit Details", IMG_1804 "Looking for other options?"), with extensions E3 (green check) and E4 (progress card).
+  "Visit Details", IMG_1804 "Looking for other options?"). Shopping comes first: a compact confirmation with the live
+  pickup timeline (E3, E4), then the three "While you wait" cards, then the check-in details.
 */
-function Status({ goBack, navigate, goShop, identity, preferences, checkedInAt, couponStatus, retryCoupons, onEdit, onCancel }: { goBack: () => void; navigate: (screen: Screen) => void; goShop: (view: ShopView) => void; identity: Identity; preferences: Preferences; checkedInAt: Date; couponStatus: CouponStatus; retryCoupons: () => void; onEdit: () => void; onCancel: () => void }) {
+function Status({ goBack, navigate, goShop, identity, preferences, checkedInAt, pickup, couponStatus, retryCoupons, onEdit, onCancel }: { goBack: () => void; navigate: (screen: Screen) => void; goShop: (view: ShopView, transition?: "forward" | "fade", jump?: boolean) => void; identity: Identity; preferences: Preferences; checkedInAt: Date; pickup: Pickup; couponStatus: CouponStatus; retryCoupons: () => void; onEdit: () => void; onCancel: () => void }) {
   // The live region is filled after mount so screen readers announce the confirmation.
   const [announce, setAnnounce] = useState(false);
   useEffect(() => { const timer = window.setTimeout(() => setAnnounce(true), 150); return () => window.clearTimeout(timer); }, []);
   return (
     <div className="page flow-page status-page">
-      <AppHeader variant="mint" title="Check-In Details" back={goBack} />
+      <AppHeader title="Check-In Details" back={goBack} />
       <main className="content flow">
         <p className="sr-only" role="status">{announce ? `You're checked in. The pharmacy team at CVS 4471 knows you're here.` : ""}</p>
-        {/* EXT E3 Check-in confirmation — centred green check + CVS R10 confirmation heading */}
-        <section className="checkin-confirmation centered" aria-labelledby="confirm-title">
-          <span className="confirm-mark" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.25} strokeLinecap="round" strokeLinejoin="round"><path d="M3.33 8L6.67 11.33L12.67 4.67" /></svg></span>
-          <h2 id="confirm-title" className="t-display">{firstName(identity)} is checked in</h2>
-          <p className="t-body-lg">The pharmacy team at CVS #4471 knows you're here. No need to tell the counter.</p>
+        {/* EXT E3 Compact confirmation — green check + heading, with the live pickup timeline underneath */}
+        <section className="checkin-summary" aria-labelledby="confirm-title">
+          <div className="summary-head">
+            <span className="confirm-mark" aria-hidden="true"><Icon name="check" size={18} /></span>
+            <div className="stack-4">
+              <h2 id="confirm-title" className="t-heading-md">{firstName(identity)} is checked in</h2>
+              <p className="t-body c-secondary">No need to tell the counter. <b className="pickup-eta">{pickupLine(pickup)}</b></p>
+            </div>
+          </div>
+          <PickupTimeline pickup={pickup} />
         </section>
-        {/* While you wait — first thing after the confirmation so it is visible without scrolling */}
-        <section aria-labelledby="while-you-wait">
+        <section aria-labelledby="while-you-wait" className="while-you-wait">
           <SectionTitle id="while-you-wait" title="While you wait" />
-          <p className="t-body c-secondary">Shop this store while your prescriptions are prepared. Every item shows its aisle and shelf.</p>
-          {/* CVS R45 Category cards (IMG_1792 "Shop by category") as buttons into the two lists; EXT E14 adds the one-line description */}
-          <div className="category-cards">
-            <button type="button" className="category-card" onClick={() => goShop("low")}>
-              <span className="category-circle low" aria-hidden="true"><Packshot product={products[0]} size={64} /></span>
-              <b className="t-heading-sm">Running low</b>
-              <span className="t-caption">Items you may be out of soon</span>
-            </button>
-            <button type="button" className="category-card" onClick={() => goShop("frequent")}>
-              <span className="category-circle frequent" aria-hidden="true"><Packshot product={products[11]} size={64} /></span>
-              <b className="t-heading-sm">Frequently bought</b>
-              <span className="t-caption">Everything you've bought here</span>
-            </button>
+          <div className="shop-cards">
+            <ShopCard tone="rose" title="Buy it again" caption="Items you usually buy around now" art={<Packshot product={buyAgain[0]} size={60} />} onClick={() => goShop("low", "forward", true)} />
+            <ShopCard tone="blue" title="Frequently bought" caption="Everything you've bought here" art={<Packshot product={frequentlyBought[0]} size={60} />} onClick={() => goShop("frequent", "forward", true)} />
+            {couponStatus === "ready" && <ShopCard wide tone="teal" title={`${offers.length} coupons for you`} caption={`Up to $${offersTotal.toFixed(2)} off items you buy`} art={<CouponArt size={40} />} onClick={() => goShop("deals", "forward", true)} />}
           </div>
+          {couponStatus === "loading" && <div className="loading-line t-body c-secondary" role="status"><Spinner size={20} />Loading your coupons…</div>}
+          {couponStatus === "error" && (
+            <div className="stack-12">
+              <Notice type="warning" title="Coupons didn't load.">Your check-in isn't affected.</Notice>
+              <Button variant="secondary" onClick={retryCoupons}>Try loading coupons again</Button>
+            </div>
+          )}
         </section>
-        {/* EXT E4 Check-in progress card */}
-        <div className="progress-card">
-          <span className="t-caption c-secondary">In progress</span>
-          <b className="t-heading-md">Ready in about 12 min</b>
-          <div className="progress-line" aria-hidden="true"><i /><i /><i /></div>
-          <div className="progress-labels t-caption c-secondary" aria-label="Step 2 of 3: Preparing"><span>Checked in</span><span>Preparing</span><span>Ready</span></div>
-          <span className="t-caption c-secondary">Times are estimates. We'll update this screen when your prescriptions are ready.</span>
-        </div>
-        {/* CVS R46 Rewards banner (IMG_1820 "Your rewards are adding up") — opens Savings › Coupons */}
-        {couponStatus === "ready" && (
-          <button type="button" className="rewards-banner" onClick={() => navigate("savings")} data-focus-return>
-            <CouponArt size={44} />
-            <span className="body">
-              <span className="t-heading-md regular">{offers.length} coupons ready for you</span>
-              <span className="t-body">Up to ${offersTotal.toFixed(2)} off items you've bought before.</span>
-              <span className="link">View my deals<Icon name="chevron" size={18} /></span>
-            </span>
-          </button>
-        )}
-        {couponStatus === "loading" && <div className="loading-line t-body c-secondary" role="status"><Spinner size={20} />Loading your coupons…</div>}
-        {couponStatus === "error" && (
-          <div className="stack-12">
-            <Notice type="warning" title="Coupons didn't load.">Your check-in isn't affected.</Notice>
-            <Button variant="secondary" onClick={retryCoupons}>Try loading coupons again</Button>
-          </div>
-        )}
         <section>
           <h2 className="t-title">Check-in details</h2>
           <CheckinDetailRows identity={identity} preferences={preferences} />
@@ -1244,124 +1244,25 @@ function Chat({ goBack, messages, topic, typing, send, shareLanguage, preference
   );
 }
 
-/*
-  EXT E22 Product packshots — the current app shows products as packaging photographed on white, centred, uncropped
-  (IMG_1765, IMG_1769, IMG_1787). The prototype has no product photography, so each product is drawn as a simple
-  packaging illustration on white in the same framing. Not real product artwork.
-*/
-type PackKind = "bottle" | "box" | "tube" | "pump" | "can" | "bag" | "rolls" | "jar";
-type PackLook = { kind: PackKind; body: string; accent: string; ink: string; brand: string; title: string; cap?: string };
-const packLooks: Record<number, PackLook> = {
-  1: { kind: "bottle", body: "#FFFFFF", accent: "#CC0000", ink: "#FFFFFF", brand: "CVS Health", title: "Vitamin D3", cap: "#F2F2F2" },
-  2: { kind: "bottle", body: "#C8741A", accent: "#FFFFFF", ink: "#1D3F91", brand: "Nature's Bounty", title: "Fish Oil", cap: "#1D3F91" },
-  3: { kind: "box", body: "#D4202C", accent: "#FFFFFF", ink: "#FFFFFF", brand: "TYLENOL", title: "Extra Strength" },
-  4: { kind: "jar", body: "#2F7FD1", accent: "#DCEBFA", ink: "#FFFFFF", brand: "Neutrogena", title: "Hydro Boost", cap: "#1B5EA8" },
-  5: { kind: "pump", body: "#FFFFFF", accent: "#1F62A8", ink: "#FFFFFF", brand: "CeraVe", title: "Daily Lotion", cap: "#1F62A8" },
-  6: { kind: "box", body: "#FFFFFF", accent: "#CC0000", ink: "#CC0000", brand: "CVS Health", title: "Allergy Relief" },
-  7: { kind: "pump", body: "#EFE3C8", accent: "#3A6B35", ink: "#FFFFFF", brand: "Aveeno", title: "Body Wash", cap: "#3A6B35" },
-  8: { kind: "bottle", body: "#FFFFFF", accent: "#0E8C8C", ink: "#FFFFFF", brand: "CVS Health", title: "Probiotic", cap: "#F2F2F2" },
-  9: { kind: "can", body: "#D4202C", accent: "#FFFFFF", ink: "#FFFFFF", brand: "Pringles", title: "Original" },
-  10: { kind: "tube", body: "#2B2B2B", accent: "#E9E9E9", ink: "#FFFFFF", brand: "e.l.f.", title: "Primer", cap: "#111111" },
-  11: { kind: "rolls", body: "#FFFFFF", accent: "#2A6BB5", ink: "#FFFFFF", brand: "total home", title: "Paper Towels" },
-  12: { kind: "box", body: "#D8232A", accent: "#FFFFFF", ink: "#FFFFFF", brand: "Colgate", title: "Total Whitening" },
-  13: { kind: "can", body: "#2E8B3E", accent: "#FFFFFF", ink: "#FFFFFF", brand: "Pringles", title: "Sour Cream" },
-  14: { kind: "bottle", body: "#1D3F91", accent: "#F5C518", ink: "#1D3F91", brand: "Advil", title: "Ibuprofen", cap: "#FFFFFF" },
-  15: { kind: "bottle", body: "#FFFFFF", accent: "#CC0000", ink: "#FFFFFF", brand: "CVS Health", title: "Multivitamin", cap: "#F2F2F2" },
-  16: { kind: "box", body: "#FFFFFF", accent: "#D4202C", ink: "#D4202C", brand: "BAND-AID", title: "Flexible Fabric" },
-  17: { kind: "bag", body: "#F5C518", accent: "#D4202C", ink: "#FFFFFF", brand: "Lay's", title: "Classic" },
-};
-
+/* Product packshots — the product photos the CVS app shows, on white, centred, uncropped (IMG_1765, IMG_1769, IMG_1795) */
 function Packshot({ product, size = 108 }: { product: Product; size?: number }) {
-  const look = packLooks[product.id] ?? packLooks[1];
-  const { body, accent, ink, brand, title, cap = "#E6E6E6" } = look;
-  const font = "Arial, Helvetica, sans-serif";
-  const outline = body.toUpperCase() === "#FFFFFF" ? "#D9D9D9" : "none";
-  const label = (y: number, brandSize = 8, titleSize = 7.5) => (
-    <>
-      <text x="60" y={y} textAnchor="middle" fontFamily={font} fontWeight="700" fontSize={brandSize} fill={ink}>{brand}</text>
-      <text x="60" y={y + titleSize + 3} textAnchor="middle" fontFamily={font} fontWeight="700" fontSize={titleSize} fill={ink}>{title}</text>
-    </>
-  );
-  let art: React.ReactNode;
-  if (look.kind === "bottle") art = <>
-    <rect x="44" y="12" width="32" height="14" rx="3" fill={cap} stroke="#CFCFCF" />
-    <rect x="34" y="24" width="52" height="86" rx="11" fill={body} stroke={outline} />
-    <rect x="34" y="44" width="52" height="44" fill={accent} />
-    {label(62)}
-  </>;
-  if (look.kind === "box") art = <>
-    <path d="M84 22l12-8v86l-12 8z" fill={body === "#FFFFFF" ? "#EDEDED" : "#00000033"} />
-    <path d="M26 22l12-8h58l-12 8z" fill={body === "#FFFFFF" ? "#F5F5F5" : "#FFFFFF33"} />
-    <rect x="26" y="22" width="58" height="86" fill={body} stroke={outline} />
-    {body === "#FFFFFF" && <rect x="26" y="22" width="58" height="16" fill={accent} />}
-    <text x="55" y="62" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize={brand.length > 8 ? 9 : 11} fill={ink}>{brand}</text>
-    <text x="55" y="76" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="7" fill={ink}>{title}</text>
-    <rect x="34" y="88" width="42" height="8" rx="2" fill={body === "#FFFFFF" ? accent : "#FFFFFF"} opacity="0.85" />
-  </>;
-  if (look.kind === "tube") art = <>
-    <rect x="42" y="10" width="36" height="8" rx="1" fill={accent} />
-    <path d="M42 18h36l-4 74H46z" fill={body} />
-    <rect x="47" y="92" width="26" height="18" rx="4" fill={cap} />
-    {label(46, 10, 7)}
-  </>;
-  if (look.kind === "pump") art = <>
-    <path d="M56 8h22v6H62v8h-6z" fill={cap} />
-    <rect x="52" y="20" width="16" height="12" rx="2" fill={cap} />
-    <rect x="34" y="32" width="52" height="78" rx="12" fill={body} stroke={outline} />
-    <rect x="34" y="52" width="52" height="38" fill={accent} />
-    {label(68)}
-  </>;
-  if (look.kind === "jar") art = <>
-    <rect x="28" y="40" width="64" height="16" rx="4" fill={cap} />
-    <rect x="30" y="54" width="60" height="50" rx="10" fill={body} />
-    <rect x="30" y="66" width="60" height="26" fill={accent} opacity="0.25" />
-    {label(76, 9, 7)}
-  </>;
-  if (look.kind === "can") art = <>
-    <rect x="38" y="10" width="44" height="100" rx="6" fill={body} />
-    <ellipse cx="60" cy="12" rx="22" ry="4" fill="#D9D9D9" />
-    <circle cx="60" cy="58" r="13" fill="#FFFFFF" />
-    <path d="M52 61c3-3 5-3 8-1 3-2 5-2 8 1" stroke="#3A2A1A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-    <circle cx="56" cy="54" r="1.4" fill="#3A2A1A" /><circle cx="64" cy="54" r="1.4" fill="#3A2A1A" />
-    <text x="60" y="34" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="8.5" fill={ink}>{brand}</text>
-    <text x="60" y="88" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="7" fill={ink}>{title}</text>
-  </>;
-  if (look.kind === "bag") art = <>
-    <path d="M28 18l4-4 4 4 4-4 4 4 4-4 4 4 4-4 4 4 4-4 4 4 4-4 4 4 4-4 4 4v84l-4 4-4-4-4 4-4-4-4 4-4-4-4 4-4-4-4 4-4-4-4 4-4-4-4 4-4-4z" fill={body} />
-    <ellipse cx="60" cy="52" rx="24" ry="15" fill={accent} />
-    <text x="60" y="56" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="12" fill={ink}>{brand}</text>
-    <text x="60" y="84" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="8" fill="#7A4A00">{title}</text>
-  </>;
-  if (look.kind === "rolls") art = <>
-    {[30, 50, 70, 90].map((x) => <g key={x}><rect x={x - 9} y="30" width="18" height="74" fill="#FFFFFF" stroke="#D9D9D9" /><ellipse cx={x} cy="30" rx="9" ry="4" fill="#F4F4F4" stroke="#D9D9D9" /></g>)}
-    <rect x="18" y="56" width="84" height="26" fill={accent} />
-    <text x="60" y="68" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="8" fill={ink}>{brand}</text>
-    <text x="60" y="78" textAnchor="middle" fontFamily={font} fontWeight="700" fontSize="7" fill={ink}>{title}</text>
-  </>;
-  return (
-    <svg className="packshot" width={size} height={size} viewBox="0 0 120 120" aria-hidden="true">
-      <rect width="120" height="120" fill="#FFFFFF" />
-      <ellipse cx="60" cy="112" rx="30" ry="3" fill="#000000" opacity="0.06" />
-      {art}
-    </svg>
-  );
+  return <img className="packshot" src={product.image} alt="" width={size} height={size} />;
 }
 
 /*
   EXT E7 In-store product row — CVS R21 product list row (IMG_1765, IMG_1769) + R22 deal tag + R33 price
   + R23 aisle line (IMG_1797 "15 in stock | Aisle 10") + R3 Add button (IMG_1767) + R3 text link + E6.
-  New: "In cart" state, running-low supply line, purchase count, "View shelf location".
+  New: "In cart" state, purchase count or last-bought tag, "View shelf location".
 */
-function ProductRow({ product, inCart, add, locate, showStock, showCount }: { product: Product; inCart: boolean; add: () => void; locate: () => void; showStock: boolean; showCount: boolean }) {
+function ProductRow({ product, inCart, add, locate, showCount }: { product: Product; inCart: boolean; add: () => void; locate: () => void; showCount: boolean }) {
   return (
     <article className="product-row" aria-labelledby={`product-${product.id}`}>
       <div className="media">
-        {product.coupon && <DealTag>{product.coupon}<span className="sr-only"> coupon</span></DealTag>}
+        {product.coupon && <DealTag onCard={inCart}>{product.coupon}<span className="sr-only"> coupon</span></DealTag>}
         <button type="button" className="product-image" onClick={locate} tabIndex={-1} aria-hidden="true"><Packshot product={product} size={112} /></button>
       </div>
       <div className="info">
         <h3 id={`product-${product.id}`} className="t-heading-sm">{product.name}</h3>
-        {showStock && product.low && <span className="supply-line">{product.low}</span>}
         {showCount && product.timesBought ? <GrayTag>Bought {product.timesBought} times</GrayTag> : product.lastBought ? <GrayTag>Last bought {product.lastBought}</GrayTag> : null}
         <Price product={product} />
         <CouponState product={product} inCart={inCart} />
@@ -1404,7 +1305,7 @@ function CouponCard({ product, inCart, add, locate }: { product: Product; inCart
       <div className="coupon-main">
         <span className="coupon-art"><CouponArt /></span>
         <div className="coupon-copy">
-          <span className="t-body-lg">{inCart ? "In your cart" : "New"}</span>
+          <span className="t-body-lg">{inCart ? "On your card" : "New"}</span>
           <GrayTag>In store or online</GrayTag>
           <b className="coupon-amount">{amount} off</b>
           <p id={`coupon-${product.id}`} className="coupon-offer">{amount} Off {product.name} ({product.aisle}, {product.shelf.toLowerCase()})</p>
@@ -1413,9 +1314,9 @@ function CouponCard({ product, inCart, add, locate }: { product: Product; inCart
       <p className="coupon-meta t-body">{couponExpiry}</p>
       <div className="coupon-actions">
         <Button variant="secondary" size="md" className="deal-button" onClick={locate}>Shop this deal<span className="sr-only">: show where {product.name} is</span></Button>
-        <button type="button" className={`round-action${inCart ? " done" : ""}`} onClick={add} aria-label={inCart ? `${product.name} is in your cart. Remove` : `Add ${product.name} to cart and use this coupon`}>
-          <span className="circle" aria-hidden="true"><Icon name={inCart ? "check" : "plus"} size={22} /></span>
-          <span>{inCart ? "In cart" : "Add to cart"}</span>
+        <button type="button" className={`round-action${inCart ? " done" : ""}`} onClick={add} aria-label={inCart ? `Coupon for ${product.name} is on your card and the item is in your cart. Remove` : `Add ${product.name} to cart and put this coupon on your card`}>
+          <span key={inCart ? "on" : "off"} className="circle" aria-hidden="true"><Icon name={inCart ? "check" : "plus"} size={22} /></span>
+          <span>{inCart ? "On card" : "Add to cart"}</span>
         </button>
       </div>
     </article>
@@ -1425,17 +1326,17 @@ function CouponCard({ product, inCart, add, locate }: { product: Product; inCart
 /* Savings › Coupons — current app layout (IMG_1815–1817): "Savings" header with "Find deals" search, "Coupons" heading, All / On card / For you segmented control, Sort & refine + count, coupon cards. */
 type CouponFilter = "all" | "cart" | "foryou";
 type CouponSort = "recommended" | "savings" | "aisle";
-function Savings({ goBack, navigate, quantities, itemCount, toggle, locate }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; itemCount: number; toggle: (id: number) => void; locate: (product: Product) => void }) {
-  const [filter, setFilter] = useState<CouponFilter>("all");
+function Savings({ goBack, navigate, quantities, itemCount, toggle, locate, initialFilter = "all", extraBucksSent, sendExtraBucks }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; itemCount: number; toggle: (id: number) => void; locate: (product: Product) => void; initialFilter?: CouponFilter; extraBucksSent: boolean; sendExtraBucks: () => void }) {
+  const [filter, setFilter] = useState<CouponFilter>(initialFilter);
   const [sort, setSort] = useState<CouponSort>("recommended");
   const [sortOpen, setSortOpen] = useState(false);
   const [query, setQuery] = useState("");
   const term = query.trim().toLowerCase();
-  let list = offers.filter((product) => filter === "all" || (filter === "cart" ? !!quantities[product.id] : !!product.low));
+  let list = offers.filter((product) => filter === "all" || (filter === "cart" ? !!quantities[product.id] : !!product.dueAgain));
   if (term) list = list.filter((product) => `${product.name} ${product.keywords ?? ""}`.toLowerCase().includes(term));
   if (sort === "savings") list = [...list].sort((a, b) => saving(b) - saving(a));
   if (sort === "aisle") list = [...list].sort((a, b) => Number(a.aisle.replace(/\D/g, "")) - Number(b.aisle.replace(/\D/g, "")));
-  const filters: [CouponFilter, string][] = [["all", "All"], ["cart", "In cart"], ["foryou", "For you"]];
+  const filters: [CouponFilter, string][] = [["all", "All"], ["cart", "On card"], ["foryou", "For you"]];
   return (
     <div className={`page savings-page${itemCount ? " with-dock" : ""}`}>
       <header className="savings-head">
@@ -1447,19 +1348,31 @@ function Savings({ goBack, navigate, quantities, itemCount, toggle, locate }: { 
         </div>
         <div className="savings-search"><Icon name="search" size={22} /><input type="search" aria-label="Find deals" placeholder="Find deals" value={query} onChange={(event) => setQuery(event.target.value)} />{query ? <button type="button" className="clear" onClick={() => setQuery("")} aria-label="Clear search"><Icon name="close" size={20} /></button> : <Icon name="barcode" size={22} />}</div>
       </header>
+      {/* CVS ExtraCare block (IMG_1815): wordmark + View rewards, ExtraBucks Rewards card with Send to card */}
+      <section className="extracare-block" aria-label="ExtraCare">
+        <div className="extracare-top"><img src="shop/extracare.png" alt="ExtraCare" width={138} height={21} /><span className="view-rewards">View rewards</span></div>
+        <div className="extrabucks-card">
+          <span className="t-body-lg">ExtraBucks Rewards®</span>
+          <div className="extrabucks-row">
+            <span className="eb-figure"><b>${(extraBucksSent ? EXTRABUCKS : 0).toFixed(2)}</b><span>Total on card</span></span>
+            <span className="eb-figure"><b>${(extraBucksSent ? 0 : EXTRABUCKS).toFixed(2)}</b><span>Available</span></span>
+            <button type="button" className="eb-send" onClick={sendExtraBucks} disabled={extraBucksSent}>{extraBucksSent ? "Sent to card" : "Send to card"}</button>
+          </div>
+        </div>
+      </section>
       <main className="content savings-content">
-        <div className="coupons-head"><h2 className="t-title regular">Coupons</h2></div>
+        <div className="coupons-head"><h2 className="t-title regular">Coupons</h2><span className="weekly-ad"><Icon name="doc" size={20} />Weekly Ad</span></div>
         <div className="segmented three" role="tablist" aria-label="Coupons">
           {filters.map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={filter === value} onClick={() => setFilter(value)}>{label}</button>)}
         </div>
         <div className="coupons-tools">
           <Button variant="secondary" size="sm" className="sort-button" onClick={() => setSortOpen(true)}><Icon name="sliders" size={20} />Sort &amp; refine</Button>
-          <span className="t-body-lg" aria-live="polite">{list.length} {list.length === 1 ? "deal" : "deals"} for you</span>
+          <span className="t-body-lg" aria-live="polite">{list.length} deals and rewards</span>
         </div>
         {list.length > 0
           ? <div className="coupon-list">{list.map((product) => <CouponCard key={product.id} product={product} inCart={!!quantities[product.id]} add={() => toggle(product.id)} locate={() => locate(product)} />)}</div>
-          : <div className="empty-state"><span className="empty-circle" aria-hidden="true"><Icon name="tag" size={28} /></span><h2 className="t-heading-sm regular">{filter === "cart" ? "No coupons in your cart yet" : "No deals match"}</h2><p className="t-body">{filter === "cart" ? "Add an item with a coupon and its coupon shows here." : "Try another word, or choose All."}</p></div>}
-        <p className="t-caption c-secondary">Coupons are applied when the cashier scans your checkout pass. Expiry dates are examples in this prototype.</p>
+          : <div className="empty-state"><span className="empty-circle" aria-hidden="true"><Icon name="tag" size={28} /></span><h2 className="t-heading-sm regular">{filter === "cart" ? "No coupons on your card yet" : "No deals match"}</h2><p className="t-body">{filter === "cart" ? "Add an item with a coupon and its coupon goes on your card." : "Try another word, or choose All."}</p></div>}
+        <p className="t-caption c-secondary">Coupons on your card are applied when the cashier scans your checkout pass. Expiry dates are examples in this prototype.</p>
       </main>
       {itemCount > 0 && <div className="cart-dock"><Button onClick={() => navigate("order")}>Review in-store cart ({items(itemCount)})</Button></div>}
       {sortOpen && (
@@ -1473,14 +1386,14 @@ function Savings({ goBack, navigate, quantities, itemCount, toggle, locate }: { 
 }
 
 /* CVS R44 Product card with round add-to-cart button (IMG_1787, IMG_1789, IMG_1798 "Trending Now" / "You May Also Like") */
-function ProductCard({ product, add }: { product: Product; add: () => void }) {
+function ProductCard({ product, add, inCart = false }: { product: Product; add: () => void; inCart?: boolean }) {
   return (
     <article className="product-card" aria-labelledby={`card-${product.id}`}>
       <div className="card-media">
         <Packshot product={product} size={128} />
         <button type="button" className="fab-add" onClick={add} aria-label={`Add ${product.name} to cart`}><Icon name="cartPlus" size={26} /></button>
       </div>
-      {product.coupon && <DealTag>{product.coupon}<span className="sr-only"> coupon</span></DealTag>}
+      {product.coupon && <DealTag onCard={inCart}>{product.coupon}<span className="sr-only"> coupon</span></DealTag>}
       <b className="t-heading-sm">{product.price}</b>
       <span id={`card-${product.id}`} className="t-body card-name">{product.name}</span>
       <span className="stock-line">{product.aisle}</span>
@@ -1489,56 +1402,86 @@ function ProductCard({ product, add }: { product: Product; add: () => void }) {
 }
 
 const viewCopy: Record<ShopView, string> = {
-  low: "Items you may be out of soon, based on when you last bought them.",
-  frequent: "Everything you've bought at CVS before, starting with what you buy most. Includes items that are running low.",
+  low: "Items you usually buy around now, based on how often you buy them.",
+  frequent: "Everything you've bought at CVS before, starting with what you buy most.",
+  deals: "Coupons for items you buy. Add an item and its coupon goes on your card.",
 };
+const shopCategories: { name: string; image: string }[] = [
+  { name: "Health & Medicine", image: "shop/cat-health-medicine.png" },
+  { name: "Beauty", image: "shop/cat-beauty.png" },
+  { name: "Personal Care", image: "shop/cat-personal-care.png" },
+];
 
-function Shop({ goBack, navigate, quantities, itemCount, toggle, view, setView, query, setQuery, locate }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; itemCount: number; toggle: (id: number) => void; view: ShopView; setView: (view: ShopView) => void; query: string; setQuery: (query: string) => void; locate: (product: Product) => void }) {
+/*
+  Shop — the current app's Shop tab (IMG_1790 header, search, location bar, "Spooky season" banner, Extra Big Deals
+  promo; IMG_1792 "Shop by category"). EXT E24 adds one section at the top while the shopper is checked in:
+  "Shop while you wait", with the Buy it again / Frequently bought lists. The check-in screen's two cards jump here.
+*/
+function Shop({ goBack, navigate, quantities, itemCount, toggle, view, setView, query, setQuery, locate, checkedIn, pickup, jump }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; itemCount: number; toggle: (id: number) => void; view: ShopView; setView: (view: ShopView) => void; query: string; setQuery: (query: string) => void; locate: (product: Product) => void; checkedIn: boolean; pickup: Pickup; jump: boolean }) {
   const term = query.trim().toLowerCase();
   const results = term ? products.filter((product) => { const text = `${product.name} ${product.keywords ?? ""}`.toLowerCase(); return term.split(/\s+/).every((part) => text.includes(part)); }) : [];
-  const shown = term ? results : view === "low" ? runningLow : frequentlyBought;
-  const couponsHere = shown.filter((product) => product.coupon);
+  const list = view === "low" ? buyAgain : view === "deals" ? offers : frequentlyBought;
+  const [expanded, setExpanded] = useState(false);
+  const shown = term ? results : expanded ? list : list.slice(0, 3);
+  const sectionRef = useRef<HTMLElement>(null);
+  useEffect(() => { if (jump) sectionRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" }); }, [jump]);
+  useEffect(() => { setExpanded(false); }, [view]);
+  const rows = (entries: Product[]) => <div className="product-list">{entries.map((product) => <ProductRow key={product.id} product={product} showCount={!!term || view === "frequent"} inCart={!!quantities[product.id]} add={() => toggle(product.id)} locate={() => locate(product)} />)}</div>;
   return (
     <div className={`page shop-page${itemCount ? " with-dock" : ""}`}>
-      <AppHeader variant="shop" title="Shop while you wait" back={goBack} cartCount={itemCount} onCart={() => navigate("order")}>
-        <SearchBar value={query} onChange={setQuery} placeholder="Search this store" />
+      <AppHeader variant="shop" title="Shop" back={goBack} cartCount={itemCount} onCart={() => navigate("order")}>
+        <SearchBar value={query} onChange={setQuery} placeholder="Search or ask a question" />
       </AppHeader>
-      {/* CVS R28 Location bar (IMG_1790 "Find a location near you") */}
-      <div className="location-bar"><StoreIllustration /><b className="t-heading-sm">Shopping at CVS #4471</b><Icon name="info" size={22} /></div>
-      <main className="content">
-        {/* EXT E19 Shelf-location feature card — CVS R11 card shell + R8 icon circle */}
-        <div className="feature-card">
-          <span className="icon-circle" aria-hidden="true"><Icon name="pin" size={24} /></span>
-          <div className="body"><b className="t-heading-sm">Find every item on the shelf</b><p className="t-body">Each item shows its aisle. Tap <b>Shelf location</b> to see the exact shelf and section in this store. You pay at the register.</p></div>
-        </div>
-        {term ? (
-          <>
-            {results.length > 0 && <div className="results-head"><h2 className="t-label" aria-live="polite">{`${results.length} ${results.length === 1 ? "result" : "results"} for "${query.trim()}"`}</h2></div>}
-            {!results.length && (
-              <div className="stack-12">
-                {/* CVS R29 Empty state (IMG_1821 "Not ready to checkout?") */}
-                <div className="empty-state">
-                  <span className="empty-circle" aria-hidden="true"><Icon name="search" size={28} /></span>
-                  <h2 className="t-heading-sm regular" aria-live="polite">{`No results for "${query.trim()}"`}</h2>
-                  <p className="t-body">Check the spelling, or try a broader word like "vitamins" or "chips". A store team member can also help you find it.</p>
-                </div>
-                <Button onClick={() => setQuery("")}>Clear search</Button>
-                <Button variant="text" size="md" onClick={() => { setQuery(""); setView("frequent"); }}>Browse frequently bought</Button>
+      {/* CVS R28 Location bar (IMG_1790 "Find a location near you"); names the store once checked in */}
+      <div className="location-bar"><StoreIllustration /><b className="t-heading-sm">{checkedIn ? "Shopping at CVS #4471" : "Find a location near you"}</b><Icon name="info" size={22} /></div>
+      {term ? (
+        <main className="content">
+          {results.length > 0 && <div className="results-head"><h2 className="t-label" aria-live="polite">{`${results.length} ${results.length === 1 ? "result" : "results"} for "${query.trim()}"`}</h2></div>}
+          {!results.length && (
+            <div className="stack-12">
+              {/* CVS R29 Empty state (IMG_1821 "Not ready to checkout?") */}
+              <div className="empty-state">
+                <span className="empty-circle" aria-hidden="true"><Icon name="search" size={28} /></span>
+                <h2 className="t-heading-sm regular" aria-live="polite">{`No results for "${query.trim()}"`}</h2>
+                <p className="t-body">Check the spelling, or try a broader word like "vitamins" or "chips". A store team member can also help you find it.</p>
               </div>
-            )}
-          </>
-        ) : (
-          <>
-            <SegmentedControl selected={view} onSelect={setView} label="Product lists" />
-            <div className="results-head">
-              <h2 className="t-label">{items(shown.length)}</h2>
-              <p className="t-caption c-secondary">{viewCopy[view]}</p>
+              <Button onClick={() => setQuery("")}>Clear search</Button>
             </div>
-            {couponsHere.length > 0 && <Notice title={`${couponsHere.length} of these items have coupons.`}>Look for the yellow tags. Coupons are applied when the cashier scans your checkout pass.</Notice>}
-          </>
-        )}
-        {shown.length > 0 && <div className="product-list">{shown.map((product) => <ProductRow key={product.id} product={product} showStock={!term && view === "low"} showCount={!!term || view === "frequent"} inCart={!!quantities[product.id]} add={() => toggle(product.id)} locate={() => locate(product)} />)}</div>}
-      </main>
+          )}
+          {results.length > 0 && rows(results)}
+        </main>
+      ) : (
+        <main className="content shop-content">
+          {/* EXT E24 Shop while you wait — CVS R9 section title, R5 segmented control, R21 product rows */}
+          <section ref={sectionRef} id="while-you-wait-lists" className="wait-section" aria-labelledby="wait-title">
+            <div className="stack-4">
+              <h2 id="wait-title" className="t-title">{checkedIn ? "Shop while you wait" : "Your CVS items"}</h2>
+              <p className="t-body c-secondary">{checkedIn ? `${pickupLine(pickup)}. Every item shows its aisle in this store.` : "Items you've bought at CVS before."}</p>
+            </div>
+            <SegmentedControl selected={view} onSelect={setView} label="Product lists" />
+            <p className="t-caption c-secondary">{viewCopy[view]}</p>
+            {rows(shown)}
+            {list.length > 3 && <Button variant="secondary" onClick={() => setExpanded((open) => !open)}>{expanded ? "Show fewer" : `See all ${list.length} items`}</Button>}
+          </section>
+          {/* CVS banner carousel (IMG_1790 "Spooky season is here!") */}
+          <div className="season-banner" aria-hidden="true">
+            <span className="season-line"><img src="shop/pumpkin.png" alt="" width={26} height={26} />Spooky season is here!<Icon name="chevron" size={22} /></span>
+            <span className="season-dots"><i className="on" /><i /><i /></span>
+          </div>
+          {/* CVS promo card (IMG_1790) — opens Savings */}
+          <button type="button" className="promo-card outline" onClick={() => navigate("savings")}>
+            <img src="shop/extra-big-deals.png" alt="Extra extra big deals days with ExtraCare" width={370} height={159} />
+            <span className="promo-body"><b className="promo-title">Last chance for double the deals!</b><span className="promo-text">So many Extra Big Deals, so little time. Ends October 10.</span></span>
+          </button>
+          {/* CVS R45 Shop by category (IMG_1792) */}
+          <section className="category-section" aria-labelledby="category-title">
+            <div className="section-title-row"><h2 id="category-title" className="t-title">Shop by category</h2><span className="see-all">See All</span></div>
+            <div className="category-row" aria-hidden="true">
+              {shopCategories.map((category) => <div key={category.name} className="shop-category"><img src={category.image} alt="" width={72} height={72} /><b>{category.name}</b></div>)}
+            </div>
+          </section>
+        </main>
+      )}
       {itemCount > 0 && <div className="cart-dock"><Button onClick={() => navigate("order")}>Review in-store cart ({items(itemCount)})</Button></div>}
     </div>
   );
@@ -1591,7 +1534,7 @@ function OrderSummary({ title, rows, total, note, children }: { title: string; r
 }
 
 /* In-store cart — current CVS cart layout (IMG_1818–1819): R15 fulfillment header, R14 item cards, R17 bands, R16 summary */
-function Order({ goBack, goShop, navigate, quantities, setQuantity, toggle }: { goBack: () => void; goShop: (view: ShopView) => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; setQuantity: (id: number, quantity: number) => void; toggle: (id: number) => void }) {
+function Order({ goBack, goShop, navigate, quantities, setQuantity, toggle, extraBucks }: { goBack: () => void; goShop: (view: ShopView) => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; setQuantity: (id: number, quantity: number) => void; toggle: (id: number) => void; extraBucks: number }) {
   const { chosen, subtotal, savings, itemCount, coupons } = cartTotals(quantities);
   const available = offers.filter((product) => !quantities[product.id]);
   return (
@@ -1634,7 +1577,7 @@ function Order({ goBack, goShop, navigate, quantities, setQuantity, toggle }: { 
             <h2 className="t-heading-md">Coupons</h2>
             <div className="summary-row t-body"><span>Added to this cart</span><span>{coupons} · −${savings.toFixed(2)}</span></div>
             <div className="summary-row t-body"><span>Available for other items</span><span>{available.length}</span></div>
-            <p className="t-caption c-secondary">Added coupons are applied when the cashier scans your checkout pass.</p>
+            <p className="t-caption c-secondary">Coupons on your card are applied when the cashier scans your checkout pass.</p>
             {available.length > 0 && <Button variant="secondary" onClick={() => navigate("savings")}>Add other items with coupons</Button>}
           </div>
         </section>
@@ -1647,10 +1590,11 @@ function Order({ goBack, goShop, navigate, quantities, setQuantity, toggle }: { 
         )}
         <OrderSummary
           title="Order summary"
-          rows={[[`Store items (${items(itemCount)})`, `$${subtotal.toFixed(2)}`], ["Coupons", `−$${savings.toFixed(2)}`, "sale-text"], ["Prescription copay", "$10.00"]]}
-          total={["Estimated total at register", `$${(subtotal - savings + 10).toFixed(2)}`]}
+          rows={[[`Store items (${items(itemCount)})`, `$${subtotal.toFixed(2)}`], ["Coupons", `−$${savings.toFixed(2)}`, "sale-text"], ...(extraBucks > 0 ? [["ExtraBucks Rewards", `−$${extraBucks.toFixed(2)}`, "sale-text"] as [string, string, string]] : []), ["Prescription copay", "$10.00"]]}
+          total={["Estimated total at register", `$${Math.max(0, subtotal - savings - extraBucks + 10).toFixed(2)}`]}
           note="Nothing is charged in the app. Tax and final prices are calculated at the register."
         >
+          {/* The one way to the code: add items › Review in-store cart › Get checkout pass */}
           <Button disabled={!chosen.length} onClick={() => navigate("ready")}>Get checkout pass</Button>
         </OrderSummary>
       </main>
@@ -1658,8 +1602,8 @@ function Order({ goBack, goShop, navigate, quantities, setQuantity, toggle }: { 
   );
 }
 
-/* Checkout pass — CVS R1 cart header, R10 heading, EXT E11 pass card, R8 rows, R19 step circles, R11 info notice */
-function SavingsPass({ goBack, navigate, quantities, identity }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; identity: Identity }) {
+/* Checkout pass (opened only from Review in-store cart) — CVS R1 cart header, R10 heading, EXT E11 pass card, R8 rows, R19 step circles, R11 info notice */
+function SavingsPass({ goBack, navigate, quantities, identity, extraBucks }: { goBack: () => void; navigate: (screen: Screen) => void; quantities: Record<number, number>; identity: Identity; extraBucks: number }) {
   const { savings, itemCount, coupons } = cartTotals(quantities);
   const qrCells = Array.from({ length: 81 }, (_, index) => ((index * 7 + index % 4) % 5 < 2 || [0, 1, 2, 9, 11, 18, 19, 20, 60, 61, 62, 69, 71, 78, 79, 80].includes(index)));
   const steps = ["Bring your items to the pharmacy or front register", "Show this code before the cashier totals your purchase", "Pay at the register and collect your prescriptions"];
@@ -1678,6 +1622,7 @@ function SavingsPass({ goBack, navigate, quantities, identity }: { goBack: () =>
         </article>
         <div>
           <DetailRow icon="tag" title="Coupons to apply" value={`${coupons} · −$${savings.toFixed(2)}`} />
+          {extraBucks > 0 && <DetailRow icon="tag" title="ExtraBucks Rewards on card" value={`−$${extraBucks.toFixed(2)}`} />}
           <DetailRow icon="cart" title="Store items to pay for" value={`${itemCount}`} />
           <DetailRow icon="rx" title="Prescriptions to pick up" value="2" />
         </div>
@@ -1693,7 +1638,7 @@ function SavingsPass({ goBack, navigate, quantities, identity }: { goBack: () =>
 }
 
 /* Visit complete — CVS confirmation layout (ScreenRecording 11-33-18 "Visit Details"), R16 summary, EXT E12 rating */
-function Done({ finish, quantities }: { finish: () => void; quantities: Record<number, number> }) {
+function Done({ finish, quantities, extraBucks }: { finish: () => void; quantities: Record<number, number>; extraBucks: number }) {
   const { savings, itemCount, coupons } = cartTotals(quantities);
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -1711,6 +1656,7 @@ function Done({ finish, quantities }: { finish: () => void; quantities: Record<n
           <h2 className="t-heading-lg">Your visit</h2>
           <div className="summary-row t-body"><span>Store items on your list</span><span>{itemCount}</span></div>
           <div className="summary-row t-body"><span>Coupons on your pass</span><span>{coupons} · −${savings.toFixed(2)}</span></div>
+          {extraBucks > 0 && <div className="summary-row t-body"><span>ExtraBucks Rewards</span><span>−${extraBucks.toFixed(2)}</span></div>}
           <div className="summary-row t-body"><span>Prescriptions</span><span>2</span></div>
         </div>
         {/* EXT E12 Rating input — star style from the current app's product ratings (IMG_1765) */}
@@ -1742,6 +1688,82 @@ function Done({ finish, quantities }: { finish: () => void; quantities: Record<n
   );
 }
 
+/*
+  CVS "Scan in store" floating button (ScreenRecording 11-28-01: Home and Shop). Same gradient pill, icon,
+  position above the tab bar, collapse to an icon-only circle on scroll down, and the white light that sweeps
+  across it three times when a screen opens, as in the current app.
+  EXT E18: a supporting savings tracker, not a checkout path. Once coupons are on the card, the
+  label shows what they save ("Saving $7.50"); the amount counts up and the light sweeps once when a coupon is
+  added. Tapping it opens Savings (All coupons, or On card once coupons are saving). The collapsed circle carries
+  the coupon count in the CVS red count badge. It never opens the checkout code; paying always goes through
+  Review in-store cart › Get checkout pass.
+*/
+function useCountUp(target: number, paused: boolean) {
+  const [value, setValue] = useState(target);
+  const [pulse, setPulse] = useState(0);
+  const current = useRef(target);
+  useEffect(() => {
+    if (paused || target === current.current) return;
+    const from = current.current;
+    if (target > from) setPulse((count) => count + 1);
+    if (reduceMotion()) { current.current = target; setValue(target); return; }
+    const start = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 700);
+      current.current = t < 1 ? from + (target - from) * (1 - Math.pow(1 - t, 3)) : target;
+      setValue(current.current);
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, paused]);
+  return { value, pulse };
+}
+
+function ScanInStoreButton({ screen, quantities, extraBucks, raised, paused, onOpen }: { screen: Screen; quantities: Record<number, number>; extraBucks: number; raised: boolean; paused: boolean; onOpen: (saving: boolean) => void }) {
+  const { savings: couponSavings, coupons } = cartTotals(quantities);
+  // Everything that will come off at the register: coupons on the card plus ExtraBucks sent to the card
+  const savings = couponSavings + extraBucks;
+  const onCard = coupons + (extraBucks > 0 ? 1 : 0);
+  const showSavings = savings > 0;
+  const { value, pulse } = useCountUp(savings, paused);
+  const [collapsed, setCollapsed] = useState(false);
+  const [sheen, setSheen] = useState({ id: 0, times: 3 });
+  const lastTop = useRef(0);
+  useEffect(() => { setSheen((current) => ({ id: current.id + 1, times: 3 })); }, [screen]);
+  // When savings go up, the button opens back up (even if scrolled into its icon-only state) so the count-up is seen
+  useEffect(() => { if (pulse > 0) { setCollapsed(false); setSheen((current) => ({ id: current.id + 1, times: 1 })); } }, [pulse]);
+
+  // Collapse on scroll down, expand on scroll up. Listens in the capture phase so it covers the window (Shop, Savings) and the Home page's own scroller.
+  useEffect(() => {
+    setCollapsed(false);
+    lastTop.current = 0;
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      const top = target instanceof HTMLElement ? target.scrollTop : window.scrollY;
+      if (Math.abs(top - lastTop.current) < 6) return;
+      setCollapsed(top > 24 && top > lastTop.current);
+      lastTop.current = top;
+    };
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener("scroll", onScroll, { capture: true });
+  }, [screen]);
+
+  // The label switches once the amount starts counting, so it never reads "$0.00" while the cart sheet is open.
+  const tracking = showSavings && value >= 0.005;
+  const label = tracking ? `Saving $${value.toFixed(2)}` : "Scan in store";
+  const accessibleLabel = showSavings ? `Saving $${savings.toFixed(2)} with ${onCard} ${onCard === 1 ? "saving" : "savings"} on your card. Opens your coupons.` : "Scan in store. Opens your coupons.";
+  return (
+    <button type="button" key={`scan-${pulse}`} className={`scan-store${collapsed ? " collapsed" : ""}${raised ? " raised" : ""}${pulse > 0 ? " caught" : ""}`} onClick={() => onOpen(coupons > 0)} aria-label={accessibleLabel}>
+      <span className="scan-sheen-clip" aria-hidden="true"><span key={sheen.id} className="scan-sheen" style={{ animationIterationCount: sheen.times }} /></span>
+      <Icon name="scanStore" size={24} />
+      <span className="scan-label" aria-hidden="true">{label}</span>
+      {showSavings && collapsed && <i className="count-badge" aria-hidden="true">{onCard}</i>}
+    </button>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
   const [navHistory, setNavHistory] = useState<Screen[]>([]);
@@ -1763,6 +1785,9 @@ export default function App() {
   const failCheckinNext = useRef(checkinMode === "error");
   // Shop
   const [shopView, setShopView] = useState<ShopView>("low");
+  const [shopJump, setShopJump] = useState(false);
+  const [savingsFilter, setSavingsFilter] = useState<CouponFilter>("all");
+  const [extraBucks, setExtraBucks] = useState(0);
   const [query, setQuery] = useState("");
   const [locator, setLocator] = useState<Product | null>(null);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -1771,16 +1796,16 @@ export default function App() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [chatTopic, setChatTopic] = useState<ChatTopic>("free");
   const [typing, setTyping] = useState(false);
-  // Coupon popup (signature microinteraction)
+  // Coupons offered on the check-in screen
   const [couponStatus, setCouponStatus] = useState<CouponStatus>("loading");
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [popupClosing, setPopupClosing] = useState(false);
-  const [autoShown, setAutoShown] = useState(false);
   const failNext = useRef(false);
 
+  const pickup = usePickup(checkedIn, checkedInAt);
+  // Savings opens on "On card" only when reached from the savings tracker button; any other way in shows All.
+  useEffect(() => { if (screen !== "savings") setSavingsFilter("all"); }, [screen]);
   const itemCount = Object.values(quantities).reduce((sum, quantity) => sum + quantity, 0);
   const subtotal = products.reduce((sum, product) => sum + (quantities[product.id] ? money(product.price) * quantities[product.id] : 0), 0);
-  const overlayOpen = popupOpen || !!locator || !!cartSheet || !!sheet || cancelOpen || loading;
+  const overlayOpen = !!locator || !!cartSheet || !!sheet || cancelOpen || loading;
 
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -1820,8 +1845,9 @@ export default function App() {
     setReturnToReview(false);
     scrollTop();
   };
-  const goShop = (view: ShopView, transition: "forward" | "fade" = "forward") => {
+  const goShop = (view: ShopView, transition: "forward" | "fade" = "forward", jump = false) => {
     setShopView(view);
+    setShopJump(jump);
     setQuery("");
     navigate("shop", transition);
   };
@@ -1873,7 +1899,7 @@ export default function App() {
   const editFromReview = (step: Screen) => { setReturnToReview(true); navigate(step); };
   const editCheckin = () => { setDraft(preferences); setEditing(true); setReturnToReview(false); navigate("review"); };
 
-  // Check-in request (simulated). Coupons are requested in parallel so the popup can appear the moment check-in succeeds.
+  // Check-in request (simulated). Coupons are requested in parallel so they are ready on the check-in screen.
   const submitCheckin = () => {
     if (editing) { setPreferences(draft); setEditing(false); goBack(); return; }
     if (loading) return;
@@ -1887,7 +1913,6 @@ export default function App() {
       setPreferences(draft);
       setCheckedIn(true);
       setCheckedInAt(new Date());
-      setAutoShown(false);
       navigateFresh("status");
     }, 900);
   };
@@ -1897,29 +1922,11 @@ export default function App() {
     setLoading(true);
     window.setTimeout(() => {
       setLoading(false);
-      setCheckedIn(false); setPopupOpen(false); setAutoShown(false); setCouponStatus("loading"); setChat([]);
+      setCheckedIn(false); setCouponStatus("loading"); setChat([]);
       setCanceledAt(new Date());
       navigateFresh("canceled");
     }, 700);
   };
-
-  // One coordinated exit for the popup: the overlay fades out (200 ms) while the destination, if any, fades in beneath it.
-  const closePopup = (destination?: () => void) => {
-    if (!popupOpen || popupClosing) return;
-    destination?.();
-    if (reduceMotion()) { setPopupOpen(false); return; }
-    setPopupClosing(true);
-    window.setTimeout(() => { setPopupOpen(false); setPopupClosing(false); }, 200);
-  };
-
-  // Auto-show once per check-in, as soon as check-in has succeeded and offers are available (or failed to load).
-  useLayoutEffect(() => {
-    if (screen !== "status" || !checkedIn || autoShown || loading) return;
-    if (couponStatus === "none") { setAutoShown(true); return; }
-    if (couponStatus === "loading") return;
-    setPopupOpen(true);
-    setAutoShown(true);
-  }, [screen, checkedIn, autoShown, couponStatus, loading]);
 
   // Pharmacy Help (simulated replies)
   const reply = (text: string) => {
@@ -1972,7 +1979,7 @@ export default function App() {
   const pharmacyTarget: Screen = checkedIn ? "status" : "visit";
 
   const current = screen === "home"
-    ? <Home navigate={navigate} cartCount={itemCount} checkedIn={checkedIn} />
+    ? <Home navigate={navigate} cartCount={itemCount} checkedIn={checkedIn} pickup={pickup} />
     : screen === "visit"
     ? <PickupChecklist identity={identity} onStart={startCheckin} onDetails={() => setSheet("pickup")} goHome={goHome} />
     : screen === "identity"
@@ -1984,7 +1991,7 @@ export default function App() {
     : screen === "review"
     ? <ReviewCheckin identity={identity} draft={draft} editing={editing} failed={checkinFailed} busy={loading} onBack={() => { setEditing(false); goBack(); }} onEdit={editFromReview} onSubmit={submitCheckin} goHome={exitFlow} />
     : screen === "status"
-    ? <Status goBack={goHome} navigate={navigate} goShop={goShop} identity={identity} preferences={preferences} checkedInAt={checkedInAt} couponStatus={couponStatus} retryCoupons={() => { loadCoupons(); setPopupOpen(true); }} onEdit={editCheckin} onCancel={() => setCancelOpen(true)} />
+    ? <Status goBack={goHome} navigate={navigate} goShop={goShop} identity={identity} preferences={preferences} checkedInAt={checkedInAt} pickup={pickup} couponStatus={couponStatus} retryCoupons={loadCoupons} onEdit={editCheckin} onCancel={() => setCancelOpen(true)} />
     : screen === "canceled"
     ? <CheckinCanceled identity={identity} canceledAt={canceledAt} goHome={goHome} startAgain={() => { navigateFresh("visit"); }} />
     : screen === "messages"
@@ -1992,16 +1999,16 @@ export default function App() {
     : screen === "chat"
     ? <Chat goBack={goBack} messages={chat} topic={chatTopic} typing={typing} send={sendChat} shareLanguage={shareChatLanguage} preferences={preferences} />
     : screen === "shop"
-    ? <Shop goBack={goBack} navigate={navigate} quantities={quantities} itemCount={itemCount} toggle={toggle} view={shopView} setView={setShopView} query={query} setQuery={setQuery} locate={setLocator} />
+    ? <Shop goBack={goBack} navigate={navigate} quantities={quantities} itemCount={itemCount} toggle={toggle} view={shopView} setView={setShopView} query={query} setQuery={setQuery} locate={setLocator} checkedIn={checkedIn} pickup={pickup} jump={shopJump} />
     : screen === "savings"
-    ? <Savings goBack={goBack} navigate={navigate} quantities={quantities} itemCount={itemCount} toggle={toggle} locate={setLocator} />
+    ? <Savings goBack={goBack} navigate={navigate} quantities={quantities} itemCount={itemCount} toggle={toggle} locate={setLocator} initialFilter={savingsFilter} extraBucksSent={extraBucks > 0} sendExtraBucks={() => setExtraBucks(EXTRABUCKS)} />
     : screen === "order"
-    ? <Order goBack={goBack} goShop={goShop} navigate={navigate} quantities={quantities} setQuantity={setQuantity} toggle={toggle} />
+    ? <Order goBack={goBack} goShop={goShop} navigate={navigate} quantities={quantities} setQuantity={setQuantity} toggle={toggle} extraBucks={extraBucks} />
     : screen === "ready"
-    ? <SavingsPass goBack={goBack} navigate={navigate} quantities={quantities} identity={identity} />
-    : <Done quantities={quantities} finish={() => {
+    ? <SavingsPass goBack={goBack} navigate={navigate} quantities={quantities} identity={identity} extraBucks={extraBucks} />
+    : <Done quantities={quantities} extraBucks={extraBucks} finish={() => {
         // The visit is over: clear this check-in session so the next check-in starts fresh.
-        setCheckedIn(false); setPreferences(emptyPreferences); setDraft(emptyPreferences); setIdentity(emptyIdentity); setQuantities({}); setChat([]); setAutoShown(false); setPopupOpen(false); setPopupClosing(false); setCheckinFailed(false); setCouponStatus("loading");
+        setCheckedIn(false); setPreferences(emptyPreferences); setDraft(emptyPreferences); setIdentity(emptyIdentity); setQuantities({}); setExtraBucks(0); setChat([]); setCheckinFailed(false); setCouponStatus("loading");
         goHome();
       }} />;
 
@@ -2020,22 +2027,22 @@ export default function App() {
       onTouchEnd={handleTouchEnd}
     >
       <div className="app-frame" inert={overlayOpen}>
-        <PhoneStatus pickupState={!checkedIn || screen === "done" ? null : screen === "ready" ? "ready" : "waiting"} />
+        <PhoneStatus pickup={!checkedIn || screen === "done" ? null : pickup} />
         <div key={navKey} className={`app-screen screen-${slideDir === "fade" ? "fade" : slideDir === "forward" ? "slide-forward" : "slide-back"}`}>
           {current}
         </div>
         {tabBar}
+        {tabBar && (
+          <ScanInStoreButton
+            screen={screen}
+            extraBucks={extraBucks}
+            quantities={quantities}
+            raised={screen !== "home" && itemCount > 0}
+            paused={overlayOpen}
+            onOpen={(saving) => { setSavingsFilter(saving ? "cart" : "all"); navigate("savings"); }}
+          />
+        )}
       </div>
-      {popupOpen && (
-        <CouponPopup
-          status={couponStatus}
-          closing={popupClosing}
-          onViewDeals={() => closePopup(() => navigate("savings", "fade"))}
-          onShopList={(view) => closePopup(() => goShop(view, "fade"))}
-          onClose={() => closePopup()}
-          onRetry={loadCoupons}
-        />
-      )}
       {sheet === "pickup" && <PickupDetailsSheet identity={identity} close={() => setSheet(null)} onStart={startCheckin} />}
       {sheet === "private" && <PrivateInfoSheet close={() => setSheet(null)} />}
       {cancelOpen && <CancelCheckinModal close={() => setCancelOpen(false)} onConfirm={cancelCheckin} />}

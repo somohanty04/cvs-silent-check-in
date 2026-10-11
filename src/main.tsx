@@ -4,13 +4,13 @@ import App from './App'
 import './index.css'
 
 /*
-  Phone view. On a wide screen (desktop browser), the prototype loads itself inside a 402 × 874 pt
+  Phone view. On any screen wider than a phone (desktop browser, tablet, narrow preview pane), the prototype loads itself inside a 402 × 874 pt
   device frame so it is always reviewed at the agreed iPhone size. On a phone, or inside the frame,
   the app renders full screen. Query parameters (e.g. ?coupons=error) are passed through.
 */
 const DEVICE = { width: 402, height: 874, bezel: 12 }
 const inFrame = window.self !== window.top
-const wideScreen = window.matchMedia('(min-width: 600px)').matches
+const wideScreen = window.matchMedia('(min-width: 480px)').matches
 
 function PhoneFrame() {
   const fullWidth = DEVICE.width + DEVICE.bezel * 2
